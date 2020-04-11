@@ -26,7 +26,7 @@ Redux Toolkit 패키지는 Redux 논리를 작성하는 표준 방법입니다. 
 Redux Toolkit에는 다음 내용이 포함됩니다.
 
 - [`configureStore()` 함수](https://redux-toolkit.js.org/api/configurestore/)는 단순화 된 구성 옵션을 제공합니다 . 슬라이스 리듀서를 자동으로 결합하고 제공하는 Redux 미들웨어를 추가하고, 기본적으로 redux-thunk를 포함하며 Redux DevTools Extension을 사용할 수 있습니다.
-- [`createReducer()`유틸리티](https://redux-toolkit.js.org/api/createreducer/)는 switch 문을 작성하지 않고 reducer함수를 작성할 수 있도록 합니다. 또한  `[immer 라이브러리](https://github.com/immerjs/immer)`를 사용하여 `state.todos [3] .completed = true`와 같은 일반적인 코드로 더 간단하게 불변성을 유지하면서 상태를 업데이트할 수 있습니다.
+- [`createReducer()`유틸리티](https://redux-toolkit.js.org/api/createreducer/)는 switch 문을 작성하지 않고 reducer함수를 작성할 수 있도록 합니다. 또한  [`immer 라이브러리`](https://github.com/immerjs/immer)를 사용하여 `state.todos [3] .completed = true`와 같은 일반적인 코드로 더 간단하게 불변성을 유지하면서 상태를 업데이트할 수 있습니다.
 - [`createAction()` 유틸리티](https://redux-toolkit.js.org/api/createaction/)는 주어진 action type에 따라 action create함수를 반환합니다. 함수 자체에`toString()`이 정의되어 있으므로 별도의 상수를 선언할 필요 없이 함수 이름을 사용할 수 있습니다.
 - [`createSlice()` 함수](https://redux-toolkit.js.org/api/createslice/) 리듀서 함수 세트로서, 슬라이스 이름 및 초기 상태 값을 받아서 자동으로 slice reducer와 action creator, action types를 생성합니다.
 - [`createSelector()`유틸리티](https://redux-toolkit.js.org/api/createselector/)는 [Reselect](https://github.com/reduxjs/reselect) 라이브러리를 사용하기 쉽도록 re-export한 것입니다.
