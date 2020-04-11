@@ -13,7 +13,6 @@
     "react": "^16.10.2",
     "react-dom": "^16.10.2"
   },
-  "homepage": "https://soyoung210.github.io/redux-toolkit/",
   "browserslist": {
     "production": [
       ">0.2%",

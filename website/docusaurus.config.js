@@ -8,7 +8,7 @@ module.exports = {
         docs: {
           path: '../docs',
           sidebarPath: require.resolve('./sidebars.json'),
-          routeBasePath: '/'
+          routeBasePath: ''
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css')
@@ -17,7 +17,7 @@ module.exports = {
     ]
   ],
   projectName: 'redux-toolkit',
-  baseUrl: '/redux-toolkit',
+  baseUrl: '/redux-toolkit/',
   favicon: 'img/favicon/favicon.ico',
   tagline:
     'The official, opinionated, batteries-included toolset for efficient Redux development',
