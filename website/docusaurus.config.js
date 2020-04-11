@@ -17,12 +17,13 @@ module.exports = {
     ]
   ],
   projectName: 'redux-toolkit',
-  baseUrl: '/',
+  baseUrl: '/redux-toolkit',
   favicon: 'img/favicon/favicon.ico',
   tagline:
     'The official, opinionated, batteries-included toolset for efficient Redux development',
   title: 'Redux Toolkit',
-  url: 'https://redux-toolkit.js.org',
+  organizationName: 'SoYoung210',
+  url: 'https://SoYoung210.github.io',
   customFields: {
     repoUrl: 'https://github.com/reduxjs/redux-toolkit'
   },
