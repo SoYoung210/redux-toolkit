@@ -7,47 +7,43 @@ hide_title: true
 
 # Quick Start
 
-## Purpose
+## 목적
 
-The **Redux Toolkit** package is intended to be the standard way to write Redux logic. It was originally created to help address three common concerns about Redux:
+Redux Toolkit 패키지는 Redux 논리를 작성하는 표준 방법입니다.  Redux에 대한 세 가지 일반적인 관심사를 해결하기 위해 만들어 졌습니다.
 
-- "Configuring a Redux store is too complicated"
-- "I have to add a lot of packages to get Redux to do anything useful"
-- "Redux requires too much boilerplate code"
+- "Redux 저장소 구성이 너무 복잡합니다"
+- "Redux가 유용한 기능을 수행 할 수 있도록 많은 패키지를 추가해야 합니다."
+- "Redux에는 boilerplate 코드가 너무 많이 필요합니다"
 
-We can't solve every use case, but in the spirit of [`create-react-app`](https://github.com/facebook/create-react-app) and [`apollo-boost`](https://dev-blog.apollodata.com/zero-config-graphql-state-management-27b1f1b3c2c3), we can try to provide some tools that abstract over the setup process and handle the most common use cases, as well as include some useful utilities that will let the user simplify their application code.
+모든 Use Case를 해결할 수는 없지만 create-react-app 및 apollo-boost의 정신으로 설정 프로세스를 추상화하고 가장 일반적인 Use Case를 처리하고 사용자의 애플리케이션 코드를 단순화 시킬 수 있는  유용한 util을  제공하려고 합니다.
 
-Because of that, this package is deliberately limited in scope. It does _not_ address concepts like "reusable encapsulated Redux modules", data caching, folder or file structures, managing entity relationships in the store, and so on.
+이 패키지는 Redux에 대한 *모든 문제를 해결하기 위한 것이 아니며* 의도적으로 대응 범위가 제한되어 있습니다. "재사용 가능한 캡슐화 된 Redux 모듈", 데이터 fetch, 폴더 또는 파일 구조, redux store의 엔티티 관계 관리 등과 같은 개념은 다루지 않습니다.
 
-That said, **these tools should be beneficial to all Redux users**. Whether you're a brand new Redux user setting up your
-first project, or an experienced user who wants to simplify an existing application, **Redux Toolkit** can help
-you make your Redux code better.
+즉, 이 도구는 **모든 Redux 사용자에게 유용해야 합니다.** Redux Toolkit을 사용하면 처음 프로젝트에 Redux를 사용하는 사용자이든, 기존 프로그램을 단순화 하려는 숙련 된 사용자이든 Redux 코드를 개선 할 수 있습니다.
 
-## What's Included
+## 포함되는 것
 
-Redux Toolkit includes these APIs:
+Redux Toolkit에는 다음 내용이 포함됩니다.
 
-- [`configureStore()`](../api/configureStore.md): wraps `createStore` to provide simplified configuration options and good defaults. It can automatically combine your slice reducers, adds whatever Redux middleware you supply, includes `redux-thunk` by default, and enables use of the Redux DevTools Extension.
-- [`createReducer()`](../api/createReducer.md): that lets you supply a lookup table of action types to case reducer functions, rather than writing switch statements. In addition, it automatically uses the [`immer` library](https://github.com/mweststrate/immer) to let you write simpler immutable updates with normal mutative code, like `state.todos[3].completed = true`.
-- [`createAction()`](../api/createAction.md): generates an action creator function for the given action type string. The function itself has `toString()` defined, so that it can be used in place of the type constant.
-- [`createSlice()`](../api/createSlice.md): accepts an object of reducer functions, a slice name, and an initial state value, and automatically generates a slice reducer with corresponding action creators and action types.
-- [`createAsyncThunk`](../api/createAsyncThunk.md): accepts an action type string and a function that returns a promise, and generates a thunk that dispatches `pending/resolved/rejected` action types based on that promise
-- [`createEntityAdapter`](../api/createEntityAdapter.md): generates a set of reusable reducers and selectors to manage normalized data in the store
-- The [`createSelector` utility](../api/createSelector.md) from the [Reselect](https://github.com/reduxjs/reselect) library, re-exported for ease of use.
+- [`configureStore()` 함수](https://redux-toolkit.js.org/api/configurestore/)는 단순화 된 구성 옵션을 제공합니다 . 슬라이스 리듀서를 자동으로 결합하고 제공하는 Redux 미들웨어를 추가하고, 기본적으로 redux-thunk를 포함하며 Redux DevTools Extension을 사용할 수 있습니다.
+- [`createReducer()`유틸리티](https://redux-toolkit.js.org/api/createreducer/)는 switch 문을 작성하지 않고 reducer함수를 작성할 수 있도록 합니다. 또한  `[immer 라이브러리](https://github.com/immerjs/immer)`를 사용하여 `state.todos [3] .completed = true`와 같은 일반적인 코드로 더 간단하게 불변성을 유지하면서 상태를 업데이트할 수 있습니다.
+- [`createAction()` 유틸리티](https://redux-toolkit.js.org/api/createaction/)는 주어진 action type에 따라 action create함수를 반환합니다. 함수 자체에`toString()`이 정의되어 있으므로 별도의 상수를 선언할 필요 없이 함수 이름을 사용할 수 있습니다.
+- [`createSlice()` 함수](https://redux-toolkit.js.org/api/createslice/) 리듀서 함수 세트로서, 슬라이스 이름 및 초기 상태 값을 받아서 자동으로 slice reducer와 action creator, action types를 생성합니다.
+- [`createSelector()`유틸리티](https://redux-toolkit.js.org/api/createselector/)는 [Reselect](https://github.com/reduxjs/reselect) 라이브러리를 사용하기 쉽도록 re-export한 것입니다.
 
-## Installation
+## 설치
 
-### Using Create React App
+### Create React App과 함께 사용
 
-The recommended way to start new apps with React and Redux Toolkit is by using the [official Redux+JS template](https://github.com/reduxjs/cra-template-redux) for [Create React App](https://github.com/facebook/create-react-app), which takes advantage of React Redux's integration with React components.
+React 및 Redux Toolkit으로 새 앱을 시작하는 권장 방법은 React 구성 요소와 React Redux의 통합을 활용하는 React 앱 작성을위한 공식 Redux + JS 템플릿을 사용하는 것입니다.
 
 ```sh
 npx create-react-app my-app --template redux
 ```
 
-### An Existing App
+### 기존 프로젝트에 사용
 
-Redux Toolkit is available as a package on NPM for use with a module bundler or in a Node application:
+Redux Toolkit은 모듈 번들러 또는 노드 애플리케이션과 함께 사용하기 위해 NPM 패키지로 제공됩니다.
 
 ```bash
 # NPM
@@ -57,11 +53,8 @@ npm install @reduxjs/toolkit
 yarn add @reduxjs/toolkit
 ```
 
-It is also available as a precompiled UMD package that defines a `window.RTK` global variable.
-The UMD package can be used as a [`<script>` tag](https://unpkg.com/@reduxjs/toolkit/dist/redux-toolkit.umd.js) directly.
+### 도움 받기, 제안
 
-## Help and Discussion
+[Reactiflux Discord 커뮤니티](https://www.reactiflux.com/)의 **[#redux 채널](https://discordapp.com/invite/0ZcbPKXt5bZ6au5t)**은 Redux 학습 및 사용과 관련된 모든 질문에 대한 공식 사이트 입니다. Reactiflux는 어울리고, 질문하고, 배우기에 좋은 곳입니다.
 
-The **[#redux channel](https://discord.gg/0ZcbPKXt5bZ6au5t)** of the **[Reactiflux Discord community](http://www.reactiflux.com)** is our official resource for all questions related to learning and using Redux. Reactiflux is a great place to hang out, ask questions, and learn - come join us!
-
-You can also ask questions on [Stack Overflow](https://stackoverflow.com) using the **[#redux tag](https://stackoverflow.com/questions/tagged/redux)**.
+[Stack Overflow](https://stackoverflow.com/)에서 **#redux 태그**를 사용하여 질문할 수도 있습니다.
