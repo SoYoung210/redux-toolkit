@@ -36,7 +36,7 @@ hide_title: true
 
 이 예제는 작은 앱입니다. 이는 실제로 React와 Redux를 어떻게 함께 쓸 수 있는 지에 대한 기본사항을 설명하기 위한 것이며, 실제 프로덕션 앱에 적용시 이 튜토리얼의 방식으 "맞는 방법"으로 사용할 필요는 없습니다. 대부분의 개발자가 문서와 예제에서 볼 수 있는 패턴을 사용하는데, 이는 개선의 여지가 있습니다.
 
-## 첫 번째 단계
+## 초기 단계
 
 ### Project에 Redux Toolkit 추가하기
 
@@ -90,11 +90,11 @@ import rootReducer from "./reducers";
 
 ![Redux DevTools Extension screenshot showing initial state](/assets/tutorials/intermediate/int-tut-01-redux-devtools.png)
 
-## Creating the Todos Slice
+## Todo Slice만들기
 
-The first big step for rewriting the app is to convert the todos logic into a new "slice".
+todo app을 다시 만드는 첫 번째 단계는 todo 로직을 새로운 "slice"로 변환하는 것입니다.
 
-### Understanding Slices
+### Slices 이해하기
 
 Right now, the todos code is split into two parts. The reducer logic is in `reducers/todos.js`, while the action creators are in `actions/index.js`. In a larger app, we might even see the action type constants in their own file, like `constants/todos.js`, so they can be reused in both places.
 
