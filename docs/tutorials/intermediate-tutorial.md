@@ -36,30 +36,30 @@ hide_title: true
 
 이 예제는 작은 앱입니다. 이는 실제로 React와 Redux를 어떻게 함께 쓸 수 있는 지에 대한 기본사항을 설명하기 위한 것이며, 실제 프로덕션 앱에 적용시 이 튜토리얼의 방식으 "맞는 방법"으로 사용할 필요는 없습니다. 대부분의 개발자가 문서와 예제에서 볼 수 있는 패턴을 사용하는데, 이는 개선의 여지가 있습니다.
 
-## Initial Conversion Steps
+## 첫 번째 단계
 
-### Adding Redux Toolkit to the Project
+### Project에 Redux Toolkit 추가하기
 
-Since the original todos example is in the Redux repo, we start by copying the Redux "todos" source code to a fresh Create-React-App project, and adding Prettier to the project to help make sure the code is formatted consistently. There's also a [jsconfig.json](https://code.visualstudio.com/docs/languages/jsconfig) file to enable us to use "absolute import paths" that start from the `/src` folder.
+todos예제는 Redux저장소에 있기 때문에 Redux "todos" 소스 코드를 새로운 Create-React-App 프로젝트에 복사하고 Prettier를 추가하여 코드의 형식이 일관되게 유지하도록 합니다. `/src`폴더에서 시작하는 "절대경로 import"를 사용할 수 있도록 하는 [jsconfig.json](https://code.visualstudio.com/docs/languages/jsconfig)파일도 있습니다.
 
 > - [Initial commit](https://github.com/reduxjs/rtk-convert-todos-example/commit/a8e0a9a9d77b9dcd9e881079e7cca449084ca7b1).
 > - [Add jsconfig.json to support absolute imports](https://github.com/reduxjs/rtk-convert-todos-example/commit/b866e205b9ebece84367f11d2faabc557bd08e23)
 
-In the Basic Tutorial, we just linked to Redux Toolkit as an individual script tag. But, in a typical application, you need to add RTK as a package dependency in your project. This can be done with either the NPM or Yarn package managers:
+기본 튜토리얼에서는 Redux Toolkit을 개별 스크립트로 연결했습니다. 그러나 일반적인 앱에서는 RTK를 package dependency로 추가해야 합니다. 이는 NPM 또는 Yarn패키지 관리자를 사용하여 수행할 수 있습니다:
 
 ```bash
-# If you're using NPM:
+# NPM을 사용할 경우:
 npm install @reduxjs/toolkit
 
-# Or for Yarn:
+# Yarn을 사용할 경우:
 yarn add @reduxjs/toolkit
 ```
 
-Once that's complete, you should add and commit the modified `package.json` file and the "lock file" from your package manager (`package-lock.json` for NPM, or `yarn.lock` for Yarn).
+설치가 완료되면, `package.json` 파일과 "lock file"을 패키지 관리자에 추가하고 커밋해야 합니다.(NPM: `package-lock.json`, YARN: `yarn.lock`).
 
 > - [Add Redux Toolkit](https://github.com/reduxjs/rtk-convert-todos-example/commit/c3f47aeaecf855561e4db9d452b928f1b8b6c016)
 
-With that done, we can start to work on the code.
+이 작업이 완료되면, 이제 코드를 작성할 수 있습니다.
 
 ### Converting the Store to Use `configureStore`
 
