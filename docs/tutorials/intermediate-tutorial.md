@@ -1,39 +1,40 @@
 ---
 id: intermediate-tutorial
-title: Intermediate Tutorial
-sidebar_label: Intermediate Tutorial
+title: 중급 튜토리얼
+sidebar_label: 중급 튜토리얼
 hide_title: true
 ---
 
-# Intermediate Tutorial: Redux Toolkit in Action
+# 중급 튜토리얼: Redux Toolkit in Action
 
-In the [Basic Tutorial](./basic-tutorial.md), you saw the main API functions that are included in Redux Toolkit, and some short examples of why and how to use them. You also saw that you can use Redux and RTK from a plain JS script tag in an HTML page, without using React, NPM, Webpack, or any build tools.
+[기본 튜토리얼](./basic-tutorial.md)에서는 Redux Toolkit에 포함 된 주요 API의 기능과 간단한 예제를 다뤄보았고, React, NPM, Webpack등의 빌드 도구를 사용하지 않고 HTML 페이지의 일반 JS 스크립트 태그에서 Redux 및 RTK(Redux Toolkit)을 사용할 수 있다는 것을 알게 되었습니다.
 
-In this tutorial, you'll see how to use those APIs in a small React app. Specifically, we're going to convert the [original Redux "todos" example app](https://redux.js.org/introduction/examples#todos) to use RTK instead.
+이번 튜토리얼에서는 RTK를 React 앱에서 어떻게 사용해보는지 소개합니다. 구체적으로, [Redux "todos" 예제](https://redux.js.org/introduction/examples#todos)를 RTK로 구현해볼 것입니다.
 
-This will show several concepts:
+이번 튜토리얼에서 다루게 될 개념들 입니다:
 
-- How to convert "plain Redux" code to use RTK
-- How to use RTK in a typical React+Redux app
-- How some of the more powerful features of RTK can be used to simplify your Redux code
+- "Redux"코드를 어떻게 RTK로 바꾸는지
+- RTK를 React+Redux 앱에서 어떻게 사용하는지
+- RTK의 강력한 기능 중 하나인 'Redux 코드를 어떻게 간결하게 만드는 방법'
 
-Also, while this isn't specific to RTK, we'll look at a couple ways you can improve your React-Redux code as well.
+또한, RTK에 국한된 것은 아니지만 React-Redux 코드를 개선할 수 있는 몇 가지 방법을 살펴보겠습니다.
 
-The complete source code for the converted application from this tutorial is available at [github.com/reduxjs/rtk-convert-todos-example](https://github.com/reduxjs/rtk-convert-todos-example). We'll be walking through the conversion process as shown in this repo's history. Links to meaningful individual commits will be highlighted in quote blocks, like this:
+이 튜토리얼에서 다루는 모든 코드는 [github.com/reduxjs/rtk-convert-todos-example](https://github.com/reduxjs/rtk-convert-todos-example)에서 확인하실 수 있습니다.
+튜토리얼은 이 저장소의 커밋 히스토리를 따라가며 진행되고, 개별 커밋에 대한 링크는 다음과 같이 블록으로 강조 표시 됩니다.
 
 > - Commit message here
 
-## Reviewing the Redux Todos Example
+## Redux Todos 예제 리뷰
 
-If we inspect [the current "todos" example source code](https://github.com/reduxjs/redux/tree/9c9a4d2a1c62c9dbddcbb05488f8bd77d24c81de/examples/todos/src), we can observe a few things:
+[현재 "todos" 예제 코드](https://github.com/reduxjs/redux/tree/9c9a4d2a1c62c9dbddcbb05488f8bd77d24c81de/examples/todos/src)를 살펴보면 몇 가지 사항을 확인할 수 있습니다:
 
-- The [`todos` reducer function](https://github.com/reduxjs/redux/blob/9c9a4d2a1c62c9dbddcbb05488f8bd77d24c81de/examples/todos/src/reducers/todos.js) is doing immutable updates "by hand", by copying nested JS objects and arrays
-- The [`actions` file](https://github.com/reduxjs/redux/blob/9c9a4d2a1c62c9dbddcbb05488f8bd77d24c81de/examples/todos/src/actions/index.js) has hand-written action creator functions, and the action type strings are being duplicated between the actions file and the reducer files
-- The code is laid out using a ["folder-by-type" structure](https://redux.js.org/faq/code-structure#what-should-my-file-structure-look-like-how-should-i-group-my-action-creators-and-reducers-in-my-project-where-should-my-selectors-go), with separate files for `actions` and `reducers`
-- The React components are written using a strict version of the ["container/presentational" pattern](https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0), where [the "presentational" components are in one folder](https://github.com/reduxjs/redux/tree/9c9a4d2a1c62c9dbddcbb05488f8bd77d24c81de/examples/todos/src/components), and the [Redux "container" connection definitions are in a different folder](https://github.com/reduxjs/redux/tree/9c9a4d2a1c62c9dbddcbb05488f8bd77d24c81de/examples/todos/src/containers)
-- Some of the code isn't following some of the recommended Redux "best practices" patterns. We'll look at some specific examples as we go through this tutorial.
+- [`todos` reducer 함수](https://github.com/reduxjs/redux/blob/9c9a4d2a1c62c9dbddcbb05488f8bd77d24c81de/examples/todos/src/reducers/todos.js)는 중첩된 JS 객체와 배열을 "수동으로" 복사하며 불변성을 관리하고 있습니다.
+- [`actions` 파일](https://github.com/reduxjs/redux/blob/9c9a4d2a1c62c9dbddcbb05488f8bd77d24c81de/examples/todos/src/actions/index.js)에는 직접 작성한 액션 생성자 함수가 있으며 reducer파일과 action파일에서 중복으로 사용되는 액션 type문자열이 있습니다.
+- 예제의 코드는 `actions` 와 `reducers`를 각각 별도의 파일로 가지고 있으며, 이를 ["폴더 별"로 분리하여](https://redux.js.org/faq/code-structure#what-should-my-file-structure-look-like-how-should-i-group-my-action-creators-and-reducers-in-my-project-where-should-my-selectors-go)관리 합니다.
+- React컴포넌트는 ["container/presentational" 패턴](https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0)으로 작성되며, 여기서 "presentational"컴포넌트는와 [Redux "container" 연결에 대한 정의는 다른 폴더에 있습니다.](https://github.com/reduxjs/redux/tree/9c9a4d2a1c62c9dbddcbb05488f8bd77d24c81de/examples/todos/src/containers)
+- 일부 코드는 Redux "best practice"를 따르지 않습니다. 이 튜토리얼을 진행하면서 몇 가지 구체적인 예시를 살펴 보겠습니다.
 
-On the one hand, this is a small example app. It's meant to illustrate the basics of actually using React and Redux together, and not necessarily be used as "the right way" to do things in a full-scale production application. On the other hand, most people will use patterns they see in docs and examples, and there's definitely room for improvement here.
+이 예제는 작은 앱입니다. 이는 실제로 React와 Redux를 어떻게 함께 쓸 수 있는 지에 대한 기본사항을 설명하기 위한 것이며, 실제 프로덕션 앱에 적용시 이 튜토리얼의 방식으 "맞는 방법"으로 사용할 필요는 없습니다. 대부분의 개발자가 문서와 예제에서 볼 수 있는 패턴을 사용하는데, 이는 개선의 여지가 있습니다.
 
 ## Initial Conversion Steps
 
