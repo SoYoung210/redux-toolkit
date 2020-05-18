@@ -61,11 +61,11 @@ yarn add @reduxjs/toolkit
 
 이 작업이 완료되면, 이제 코드를 작성할 수 있습니다.
 
-### Converting the Store to Use `configureStore`
+### Store에서 `configureStore`를 사용하도록 수정
 
-Just like with the "counter" example, we can replace the plain Redux `createStore` function with RTK's `configureStore`. This will automatically set up the Redux DevTools Extension for us.
+"카운터"예제와 마찬가지로 일반 Redux `createStore`기능을 RTK의 `configureStore`로 변경할 수 있습니다. 이 과정에서 Redux DevTools 확장 프로그램이 자동으로 설정됩니다.
 
-The changes here are simple. We update `src/index.js` to import `configureStore` instead of `createStore`, and replace the function call. Remember that `configureStore` takes an options object as a parameter with named fields, so instead of passing `rootReducer` directly as the first parameter, we pass it as an object field named `reducer`:
+이 과정에서의 변경은 간단합니다. `src/index.js`에서 `createStore`대신 `configureStore`를 사용하도록 수정하면 됩니다. `configureStore`는 옵션 객체를 정확한 key와 함께 넘겨야 하므로 `rootReducer`를 첫 번째 매개변수로 전달하는 대신 `reducer`라는 key의 value로 전달합니다.
 
 > - [Convert store setup to use configureStore](https://github.com/reduxjs/rtk-convert-todos-example/commit/cdfc15edbd82beda9ef0521aa191574b6cc7695a)
 
@@ -84,9 +84,9 @@ import rootReducer from "./reducers";
 +});
 ```
 
-**Note that we're still using the same root reducer function that's already in the application, and a Redux store is still being created. All that's changed is the store is automatically set up with tools to aid you in development.**
+**여전히 이전과 동일한 root reducer를 사용하고 있으며 Redux Store는변경 중입니다. 변경된 것은 Store를 생성하는 과정에서 개발이 편리하도록 도구(역주: Redux Dev Tools)가 자동으로 설정된 것 뿐입니다.**
 
-If you have [the Redux DevTools browser extension](https://github.com/zalmoxisus/redux-devtools-extension) installed, you should now be able to see the current state if you start the application in development mode and open the DevTools Extension. It should look like this:
+[Redux DevTools 브라우저 확장프로그램](https://github.com/zalmoxisus/redux-devtools-extension)이 설치되어 있는 경우 개발자 모드에서 store의 현재 상태를 확인할 수 있습니다.
 
 ![Redux DevTools Extension screenshot showing initial state](/assets/tutorials/intermediate/int-tut-01-redux-devtools.png)
 
