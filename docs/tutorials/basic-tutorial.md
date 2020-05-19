@@ -1,7 +1,7 @@
 ---
 id: basic-tutorial
-title: Basic Tutorial
-sidebar_label: Basic Tutorial
+title: 기본 튜토리얼
+sidebar_label: 기본 튜토리얼
 hide_title: true
 ---
 

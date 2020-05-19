@@ -96,13 +96,12 @@ todo app을 다시 만드는 첫 번째 단계는 todo 로직을 새로운 "slic
 
 ### Slices 이해하기
 
-Right now, the todos code is split into two parts. The reducer logic is in `reducers/todos.js`, while the action creators are in `actions/index.js`. In a larger app, we might even see the action type constants in their own file, like `constants/todos.js`, so they can be reused in both places.
+현재, todos코드는 두 부분으로 나뉩니다. 리듀서 로직은 `reducers/todo.js`에 있고, action creator들은 `actions.index.js`에 있습니다. 더 규모가 큰 `constants/todo.js`와 같은 파일에서 액션type을 관리하고 두 곳에서 공통적으로 사용합니다.
 
-We _could_ replace those using RTK's [`createReducer`](../api/createReducer.md) and [`createAction`](../api/createAction.md) functions. However, the RTK [`createSlice` function](../api/createSlice.md) allows us to consolidate that logic in one place. It uses `createReducer` and `createAction` internally, so **in most apps, you won't need to use them yourself - `createSlice` is all you need**.
+RTK의 [`createReducer`](../api/createReducer.md)를 사용하면 해당 로직을 한 곳에서 관리할 수 있습니다. 내부적으로 `createReducer`와 `createAction`을 사용하므로 **대부분의 앱에서는 이 두 함수를 직접 사용할 필요 없이 `createSlice`만 사용하면 됩니다.**
 
-You may be wondering, "what is a 'slice', anyway?". A normal Redux application has a JS object at the top of its state tree, and that object is the result of calling the Redux [`combineReducers` function](https://redux.js.org/api/combinereducers) to join multiple reducer functions into one larger "root reducer". **We refer to one key/value section of that object as a "slice", and we use the term ["slice reducer"](https://redux.js.org/recipes/structuring-reducers/splitting-reducer-logic) to describe the reducer function responsible for updating that slice of the state**.
-
-In this app, the root reducer looks like:
+'slice'가 무엇인지 궁금할 것입니다. 일반적인 Redux앱은 상태트리의 최상단에 JS객체를 가지고 있으며, 이 객체는  [`combineReducers` 함수](https://redux.js.org/api/combinereducers)에서 여러 reducer들을 하나로 결합한 "root reducer"입니다.**이 객체에서 key/value로 구분되는 object를 "slice"라고 하며, slice의 상태를 업데이트 하는 리듀서를 ["slice reducer"](https://redux.js.org/recipes/structuring-reducers/splitting-reducer-logic)라고 합니다.**
+이 앱에서 루트 리듀서는 다음과 같습니다.:
 
 ```js
 import todos from './todos'
@@ -114,11 +113,11 @@ export default combineReducers({
 })
 ```
 
-So, the combined state looks like `{todos: [], visibilityFilter: "SHOW_ALL"}`. `state.todos` is a "slice", and the `todos` reducer function is a "slice reducer".
+따라서, `combineReducers`로 결합된 상태는 `{todos: [], visibilityFilter: "SHOW_ALL"}`와 같습니다. `state.todos`는 "slice"이고, `todos`reducer는 "slice reducer"입니다.
 
-### Examining the Original Todos Reducer
+### 기존의 Todos Reducer
 
-The original todos reducer logic looks like this:
+기존의 todos reducer는 다음과 같습니다:
 
 ```js
 const todos = (state = [], action) => {
@@ -144,21 +143,21 @@ const todos = (state = [], action) => {
 export default todos
 ```
 
-We can see that it handles three cases:
+위 경우 세 가지 케이스를 처리하고 있습니다.:
 
-- It adds a new todo by copying the existing `state` array and adding a new todo entry at the end
-- It handles toggling a todo entry by copying the existing array using `state.map()`, copies and replaces the todo object that needs to be updated, and leaves all other todo entries alone.
-- It responds to all other actions by returning the existing state (effectively saying "I don't care about that action").
+- 기존의 `state`배열을 복사하고 마지막에 새로운 아이템을 추가합니다.
+- `state.map()`을 사용하여 기존 배열을 복사하여 할일 항목을 toggle처리하고 업데이트해야 하는 아이템을 복사 및 교체하고, 업데이트가 필요하지 않은 항목들은 그대로 반환합니다.
+- 기존 상태를 반홚여 다른 모든 action에 응답합니다.
 
-It also initializes the state with a default value of `[]`, and does a default export of the reducer function.
+`[]`값으로 상태를 초기화하고 reducer를 default로 export합니다.
 
-### Writing the Slice Reducer
+### Slice Reducer작성
 
-We can do the same work with `createSlice`, but we can do it in a simpler way.
+위 작업을 `createSlice`로 더 간단하게 수행할 수 있습니다.
 
-We'll start by adding a new file called `/features/todos/todosSlice.js`. Note that while it doesn't matter how you actually structure your folders and files, we've found that [a "feature folder" approach](https://redux.js.org/faq/code-structure#what-should-my-file-structure-look-like-how-should-i-group-my-action-creators-and-reducers-in-my-project-where-should-my-selectors-go) usually works better for most applications. The file name is also entirely up to you, but a convention of `someFeatureSlice.js` is reasonable to use.
+제일 먼저, `/features/todos/todosSlice.js`에 새 파일을 추가합니다. 폴더와 파일을 구성하는 방식은 중요하지 않지만, 대부분의 앱에서 ["feature folder" 접근방식](https://redux.js.org/faq/code-structure#what-should-my-file-structure-look-like-how-should-i-group-my-action-creators-and-reducers-in-my-project-where-should-my-selectors-go)이 효과적입니다. 파일 이름은 개발자의 재량에 달려있지만, `someFeatureSlice.js`규칙이 합리적입니다.
 
-In this file, we'll add the following logic:
+이 파일에서는, 아래와 같은 로직을 추가하겠습니다.:
 
 > - [Add an initial todos slice](https://github.com/reduxjs/rtk-convert-todos-example/commit/48ce059dbb0fce1b961631821534fbcb766d3471)
 
@@ -187,32 +186,32 @@ export const { addTodo, toggleTodo } = todosSlice.actions
 export default todosSlice.reducer
 ```
 
-#### `createSlice` Options
+#### `createSlice` 옵션
 
-Let's break down what this does:
+어떤 옵션들이 있는지 살펴봅니다.:
 
-- `createSlice` takes an options object as its argument, with these options:
-  - `name`: a string that is used as the prefix for generated action types
-  - `initialState`: the initial state value for the reducer
-  - `reducers`: an object, where the keys will become action type strings, and the functions are reducers that will be run when that action type is dispatched. (These are sometimes referred to as ["case reducers"](https://redux.js.org/recipes/structuring-reducers/splitting-reducer-logic), because they're similar to a `case` in a `switch` statement)
+- `createSlice`는 다음 옵션과 함께 option 객체를 인자로 사용합니다. takes an options object as its argument, with these options:
+  - `name`: 생성 된 action types를 생성하기 위해 사용되는 prefix
+  - `initialState`: reducer의 초기 상태
+  - `reducers`: key는 action type문자열이 되고 함수는 해당 액션이 dispatch될때 실행될 reducer입니다.(`switch-case`문과 비슷해서 ["case reducers"](https://redux.js.org/recipes/structuring-reducers/splitting-reducer-logic)라고도 합니다.)
 
-So, the `addTodo` case reducer function will be run when an action with the type `"todos/addTodo"` is dispatched.
+따라서, `"todos/addTodo"`액션이 dispatch될 때 `addTodo`reducer가 수행됩니다.
 
-There's no `default` handler here. The reducer generated by `createSlice` will automatically handle all other action types by returning the current state, so we don't have to list that ourselves.
+`default`핸들러는 없습니다. `createSlice`에 의해 생성된 리듀서는 현재 dispatch된 액션이 아닌 다른 액션들에 대해 자동으로 현재 상태를 반환하도록 처리되어 있기 때문에, 직접 핸들링해주지 않아도 됩니다.
 
-#### "Mutable" Update Logic
+#### "Mutable" 업데이트 로직
 
-Notice that the `addTodo` reducer is calling `state.push()`. Normally, this is bad, because [the `array.push()` function mutates the existing array](https://doesitmutate.xyz/#push), and **[Redux reducers must _never_ mutate state!](https://redux.js.org/basics/reducers#handling-actions)**.
+`addTodo`리듀서는 `state.push()`를 호출합니다. 일반적으로 이런 방식은 [`array.push()`함수가 기존 배열을 변형하기 때문에](https://doesitmutate.xyz/#push) 좋은 방법이 아니고, **[Redux에서는 reducers에서 절대 state를 직접 변경하지 않아야 합니다!](https://redux.js.org/basics/reducers#handling-actions)**.
 
-However, `createSlice` and `createReducer` wrap your function with [`produce` from the Immer library](https://github.com/immerjs/immer). **This means you can write code that "mutates" the state inside the reducer, and Immer will safely return a correct immutably updated result.**
+그러나, `createSlice`와 `createReducer`는 [Immer library의 `produce`](https://github.com/immerjs/immer)로 래핑합니다. 이것은 이 함수를 사용하는 개발자는 리듀서 내부의 상태를 "변형하는"코드를 작성할수 있으며, Immer는 상태를 안전하게 불변하게 다룰수 있도록 처리해줍니다.
 
-Similarly, `toggleTodo` doesn't map over the array or copy the matching todo object. Instead, it just finds the matching todo object, and then mutates it by assigning `todo.completed = !todo.completed`. Again, Immer knows this object was updated, and makes copies of both the todo object and the containing array.
+마찬가지로, `toggleTodo`는 배열을 순회하거나 일치하는 todo객체를 복사하지 않습니다. 대신, 일치하는 todo객체를 찾은 다음 `todo.completed = !todo.completed`코드로 변경합니다. Immer는 이 객체가 업데이트 된 것을 감지하고 todo객체와 이를 포함하는 배열을 모두 복사합니다.
 
-Normal immutable update logic tends to obscure what you're actually trying to do because of all of the extra copying that has to happen. Here, the intent should be much more clear: we're adding an item to the end of an array, and we're modifying a field in a todo entry.
+일반적인 불변성 관리는 추가 복사가 모두 발생하여 실제로 수행하려는 작업을 모호하게 하는 경향도 있습니다. 의도가 조금더 명확히 드러나야 합니다: 배열 끝에 항목을 추가하고 todo항목의 필드를 수정하는 것.
 
-#### Exporting the Slice Functions
+#### Slice함수 내보내기
 
-`createSlice` returns an object that looks like this:
+`createSlice`는 다음과 같은 객체를 반환합니다.:
 
 ```js
 {
@@ -229,7 +228,7 @@ Normal immutable update logic tends to obscure what you're actually trying to do
 }
 ```
 
-**Notice that it auto-generated the appropriate action creator functions _and_ action types for each of our reducers - we don't have to write those by hand!**
+**각 리듀서마다 적절한 action생성자와 action type을 자동으로 생성하므로 직접 작성하지 않아도 됩니다!**
 
 We'll need to use the action creators and the reducer in other files, so at a minimum we would need to export the slice object. However, we can use a Redux community code convention called [the "ducks" pattern](https://github.com/erikras/ducks-modular-redux). Simply put, **it suggests that you should put all your action creators and reducers in one file, do named exports of the action creators, and a default export of the reducer function**.
 
