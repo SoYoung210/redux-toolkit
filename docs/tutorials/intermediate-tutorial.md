@@ -234,21 +234,25 @@ We'll need to use the action creators and the reducer in other files, so at a mi
 
 Thanks to `createSlice`, we already have our action creators and the reducer right here in one file. All we have to do is export them separately, and our todos slice file now matches the common "ducks" pattern.
 
-#### Working with Action Payloads
+액션 크리에이터와 reducer를 다른 파일에 사용하기 위해 slice object를 export해야 합니다. ["ducks" 패턴](https://github.com/erikras/ducks-modular-redux)이라고 불리는 Redex 커뮤니티 코드 규칙을 사용할 수 있습니다. 간단히 말해서, 모든 액션 크리에이터와 reducer를 한 파일에 넣고, 액션 크리에이터와 reducer를 export 해야 합니다.
 
-Speaking of the action creators, let's go back and re-examine the reducer logic for a minute.
+`createSlice` 덕분에, 우리는 이미 액션 액션 크리에이터와 reducer를 한 파일에 가지고 있습니다. 우리가 해야 할 일은 그것들을 별도로 export하는 것이고, todos 슬라이스 파일은 이제 일반적인 "ducks" 패턴과 일치한다.
 
-By default, the action creators from the RTK `createAction` function only accept one argument. That argument, whatever it is, is put into the action object as a field called `payload`.
+#### Action Payloads와 함께 사용하기
 
-There's nothing special about the field `action.payload` by itself. Redux doesn't know or care about that name. But, like "ducks", the name `payload` comes from another Redux community convention called ["Flux Standard Actions"](https://github.com/redux-utilities/flux-standard-action).
+잠시 reducer 로직을 다시 살펴보겠습니다.
 
-Actions usually need to include some extra data along with the `type` field. The original Redux code for `addTodo` has an action object that looks like `{type, id, text}`. **The FSA convention suggests that rather than having data fields with random names directly in the action object, you should always put your data inside a field named `payload`**.
+기본적으로 RTK "createAction" 함수는 "payload"라는 하나의 인수만 허용합니다.
 
-It's up to the reducer to establish what it thinks `payload` should be for each action type, and whatever code dispatches the action needs to pass in values that match that expectation. If only one value is needed, you could potentially use that as the whole `payload` value directly. More commonly, you'd need to pass in multiple values, in which case `payload` should be an object containing those values.
+`action.payload`는 그 자체로 특별한 것이 없습니다. Redux는 그 이름을 모르거나 신경 쓰지 않습니다. 그러나 "payload"라는 이름은 ["Flux Standard Actions"](https://github.com/redux-utilities/flux-standard-action)라는 또 다른 Redux 커뮤니티 컨벤션에서 유래되었습니다.
 
-In our todos slice, `addTodo` needs two fields, `id` and `text`, so we put those into an object as `payload`. For `toggleTodo`, the only value we need is the `id` of the todo being changed. We could have made that the `payload`, but I prefer always having `payload` be an object, so I made it `action.payload.id` instead.
+Action에는 일반적으로 "type" 필드와 함께 일부 추가 데이터가 포함되어야 합니다. `addTodo`의 원래 Redux 코드에는 `{type, id, text}`처럼 보이는 action 객체가 있습니다. **FSA 규약에 따르면 임의의 이름을 가진 데이터 필드를 action 객체에 직접 포함하기보다는 항상 'payload'**라는 필드 안에 데이터를 넣어야 합니다.
 
-(As a sneak peek: there _is_ a way to customize how action object payloads are created. We'll look at that later in this tutorial, or you can look through [the `createAction` API docs](../api/createAction.md) for an explanation.)
+각 액션 유형에 대해 'payload'를 무엇으로 하던, 그리고 어떤 코드를 dispatch하던 그 기대에 부합하는 값을 전달해야 한다고 생각하는지를 결정하는 것은 reducer에 달려 있습니다. 하나의 값만 필요한 경우 이 값을 전체 "payload" 값으로 직접 사용할 수 있습니다. 일반적으로 여러 값을 전달해야 합니다. 이 경우 'payload'는 해당 값을 포함하는 객체여야 합니다.
+
+우리의 todos 슬라이스에서 `addtodo`는 id와 text라는 두 개의 필드가 필요하기 때문에 우리는 그것들을 payload로 객체 안에 넣었습니다. `toggleTodo`의 경우, 우리가 필요한 유일한 값은 변경되는 할일의`id`입니다. 우리는 '페이로드'를 만들 수는 있지만 항상 '페이로드'를 객체로 사용하는 것을 선호하므로 대신 'action.payload.id'로 만들었습니다.
+
+(잠시 살펴보면, action객체 payload가 생성되는 방식을 사용자 정의하는 방법이 있습니다. 이 튜토리얼의 뒷부분에서 살펴보거나 [createAction API 문서](../api/createAction.md)에서 설명을 볼 수 있습니다.
 
 ### Updating the Todos Tests
 

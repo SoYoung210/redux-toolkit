@@ -9,8 +9,6 @@ hide_title: true
 
 Redux Toolkit에 오신 것을 환영합니다 ! 이 튜토리얼은 Redux Toolkit에서 제공하는 기본적인 함수들에 대해 소개합니다. (줄여서 "RTK"라고 알려진)
 
-This tutorial assumes that you are already familiar with the concepts of the core Redux library, as well as how to use it with React. If you aren't, please take some time to read through the [Redux docs](https://redux.js.org) and [React-Redux docs](https://react-redux.js.org) first, as the explanations here focus on how RTK usage differs from "typical" Redux code.
-
 이 튜토리얼은 React와 Redux에 이미 익숙하다는 것을 전제로 합니다. 만약 그렇지 않다면, [Redux docs](https://redux.js.org)와 [React-Redux docs](https://react-redux.js.org)를 먼저 읽어보세요. 이 튜토리얼에서는 RTK사용이 "일반적인" Redux 사용법과 어떻게 다른지 소개합니다.
 
 ## Introduction: Counter Application
@@ -18,8 +16,6 @@ This tutorial assumes that you are already familiar with the concepts of the cor
 간단한 Redux 예제(counter)를 먼저 살펴보겠습니다.
 
 ### Redux "Counter-Vanilla" 예제
-
-The Redux docs have a ["counter-vanilla" example](https://redux.js.org/introduction/examples#counter-vanilla) that shows how to create a simple Redux store with a reducer that stores a single number and responds to `"INCREMENT"` and `"DECREMENT"` action types. You can see the [the complete code as a CodeSandbox here](https://codesandbox.io/s/github/reduxjs/redux/tree/master/examples/counter-vanilla), but here's the important section:
 
 Redux 문서에 ["counter-vanilla" 예제](https://redux.js.org/introduction/examples#counter-vanilla)가 있습니다. 위 예제에서는숫자를 저장하는 reducer로 간단한 Redux store를 생성하는 방법을 소개합니다.
 
