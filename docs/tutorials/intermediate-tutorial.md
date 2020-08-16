@@ -230,10 +230,6 @@ export default todosSlice.reducer
 
 **각 리듀서마다 적절한 action생성자와 action type을 자동으로 생성하므로 직접 작성하지 않아도 됩니다!**
 
-We'll need to use the action creators and the reducer in other files, so at a minimum we would need to export the slice object. However, we can use a Redux community code convention called [the "ducks" pattern](https://github.com/erikras/ducks-modular-redux). Simply put, **it suggests that you should put all your action creators and reducers in one file, do named exports of the action creators, and a default export of the reducer function**.
-
-Thanks to `createSlice`, we already have our action creators and the reducer right here in one file. All we have to do is export them separately, and our todos slice file now matches the common "ducks" pattern.
-
 액션 크리에이터와 reducer를 다른 파일에 사용하기 위해 slice object를 export해야 합니다. ["ducks" 패턴](https://github.com/erikras/ducks-modular-redux)이라고 불리는 Redex 커뮤니티 코드 규칙을 사용할 수 있습니다. 간단히 말해서, 모든 액션 크리에이터와 reducer를 한 파일에 넣고, 액션 크리에이터와 reducer를 export 해야 합니다.
 
 `createSlice` 덕분에, 우리는 이미 액션 액션 크리에이터와 reducer를 한 파일에 가지고 있습니다. 우리가 해야 할 일은 그것들을 별도로 export하는 것이고, todos 슬라이스 파일은 이제 일반적인 "ducks" 패턴과 일치한다.
@@ -256,26 +252,25 @@ Action에는 일반적으로 "type" 필드와 함께 일부 추가 데이터가 
 
 ### Updating the Todos Tests
 
-The original todos reducer has a tests file with it. We can port those over to work with our todos slice, and verify that they both work the same way.
+todo reducer에는 테스트 파일이 있습니다. todo Slice로 작동하도록 옮기고 둘 다 동일한 방식으로 작동하는지 확인할 수 있습니다.
 
-The first step is to copy `reducers/todos.spec.js` over to `features/todos/todosSlice.spec.js`, and change the import path to read the reducer from the slice file.
+첫 번째 단계는`reducers / todos.spec.js`를`features / todos / todosSlice.spec.js`에 복사하고 import 경로를 변경하여 slice 파일에서 reducer를 읽는 것입니다.
 
-> - [Copy tests to todos slice](https://github.com/reduxjs/rtk-convert-todos-example/commit/b603312ddf55899e8a75522d407c40474948ae0b)
+>-[todoSlice에 테스트 복사](https://github.com/reduxjs/rtk-convert-todos-example/commit/b603312ddf55899e8a75522d407c40474948ae0b)
 
-Once that is done, we need to update the tests to match how RTK works.
+완료되면 RTK 작동 방식과 일치하도록 테스트를 업데이트해야합니다.
 
-The first issue is that the test file hardcodes action types like `'ADD_TODO'`. RTK's action types look like `'todos/addTodo'`. We can reference that by also importing the action creators from the todos slice, and replacing the original type constants in the test with `addTodo.type`.
+첫 번째 문제는 테스트 파일이 `'ADD_TODO'`와 같은 action type을 하드 코딩한다는 것입니다. RTK의 액션 유형은 `'todos / addTodo'`처럼 보입니다. todoSlice에서 액션 생성자를 가져오고 테스트의 액션 상수를`addTodo.type`으로 대체하여 이를 참조 할 수 있습니다.
 
-The other problem is that the action objects in the tests look like `{type, id, text}`, whereas RTK always puts those extra values inside `action.payload`. So, we need to modify the test actions to match that.
+또 다른 문제는 테스트의 액션 객체가`{type, id, text}`처럼 보이는 반면 RTK는 항상 이러한 추가 값을`action.payload` 안에 넣는다는 것입니다. 따라서 이에 맞게 테스트 작업을 수정해야합니다.
 
-(We really _could_ just replace all the inline action objects in the test with calls like `addTodo({id : 0, text: "Buy milk"})`, but this is a simpler set of changes to show for now.)
+(실제로 테스트의 모든 인라인 작업 개체를`addTodo ({id : 0, text : "Buy milk"})`와 같은 호출로 대체 할 수 있지만 지금은 긴단하게 변경합니다.)
 
-> - [Port the todos tests to work with the todos slice](https://github.com/reduxjs/rtk-convert-todos-example/commit/39dbbf37bd4c559db956c8291bbd0bf1135546bb)
+>-[todoSlice로 테스트 이동](https://github.com/reduxjs/rtk-convert-todos-example/commit/39dbbf37bd4c559db956c8291bbd0bf1135546bb)
 
-An example of the changes would be:
+변경의 예는 다음과 같습니다.
 
 ```diff
-// Change the imports to get the action creators
 -import todos from './todosSlice'
 +import todos, { addTodo, toggleTodo } from './todosSlice'
 
@@ -295,11 +290,11 @@ An example of the changes would be:
     ).toEqual([
 ```
 
-After those changes, all the tests in `todosSlice.spec.js` should pass, proving that our new RTK slice reducer works exactly the same as the original hand-written reducer!
+변경 후에`todosSlice.spec.js`의 모든 테스트를 통과해야 새로운 RTK Slice reducer가 원래 작성한 reducer와 정확히 동일하게 작동 함을 보장할 수 있습니다!
 
 ### Implementing Todo IDs
 
-In the original code, each newly added todo gets an ID value from an incrementing number:
+원래 코드에서 새로 추가 된 각 할일은 증가하는 숫자에서 ID 값을 가져옵니다.
 
 ```js
 let nextTodoId = 0
@@ -310,13 +305,13 @@ export const addTodo = text => ({
 })
 ```
 
-Right now, our todos slice doesn't do that, because the `addTodo` action creator is automatically generated for us.
+지금은 'addTodo'액션 생성자가 자동으로 생성되기 때문에 todoSlice는 그렇게하지 않습니다.
 
-We _could_ add that behavior for requiring that whatever code dispatches the add todo should have to pass in a new ID, like `addTodo({id: 1, text: "Buy milk"})`, but that would be annoying. Why should the caller have to track that value? Also, what if there are multiple parts of the app that would need to dispatch that action? It would be better to encapsulate that logic in the action creator.
+추가 작업을 전달하는 코드가`addTodo ({id : 1, text : "Buy milk"})`와 같은 새 ID를 전달해야하도록 요구하는 동작을 추가 할 수 있지만, 이는 귀찮은 작업이 됩니다. 호출자가 그 값을 추적해야하는 이유는 무엇입니까? 또한 해당 작업을 전달해야하는 앱의 여러 부분이있는 경우 어떻게해야합니까? 액션 생성자에 해당 로직을 캡슐화하는 것이 좋습니다.
 
-RTK allows you to customize how the `payload` field is created in your action objects. If you are using `createAction` by itself, you can pass a "prepare callback" as the second argument. Here's what this would look like:
+RTK를 사용하면 작업 개체에서`payload` 필드가 생성되는 방식을 지정할 수 있습니다. `createAction`을 단독으로 사용하는 경우 두 번째 인수로 "prepare callback"을 전달할 수 있습니다. 다음과 같이 표시됩니다.
 
-> - [Implement addTodo ID generation](https://github.com/reduxjs/rtk-convert-todos-example/commit/0c9e3b721c209d368d23a70cf8faca8f308ff8df)
+> - [addTodo ID 생성 구현](https://github.com/reduxjs/rtk-convert-todos-example/commit/0c9e3b721c209d368d23a70cf8faca8f308ff8df)
 
 ```js
 let nextTodoId = 0
@@ -328,9 +323,9 @@ export const addTodo = createAction('ADD_TODO', text => {
 })
 ```
 
-**Note that the "prepare callback" _must_ return an object with a field called `payload` inside!** Otherwise, the action's payload will be undefined. It _may_ also include a field called `meta`, which can be used to include extra additional metadata related to the action.
+**'prepare callback'은 내부에 'payload'라는 필드가있는 객체를 반환해야합니다.** 그렇지 않으면 작업의 페이로드가 정의되지 않습니다. 또한 액션과 관련된 추가 메타 데이터를 포함하는 데 사용할 수있는 'meta'라는 필드도 포함 할 수 있습니다.
 
-If you're using `createSlice`, it automatically calls `createAction` for you. If you need to customize the payload there, you can do so by passing an object containing `reducer` and `prepare` functions to the `reducers` object, instead of just the reducer function by itself:
+`createSlice`를 사용하는 경우 자동으로`createAction`을 호출합니다. 여기에서 페이로드를 사용자 정의해야하는 경우에는 감속기 함수 자체가 아닌`reducer` 및`prepare` 함수를 포함하는 객체를`reducers` 객체에 전달하면됩니다.
 
 ```js
 let nextTodoId = 0
@@ -352,7 +347,7 @@ const todosSlice = createSlice({
 }
 ```
 
-We can add an additional test that confirms this works:
+작동하는지 확인하는 테스트를 추가 할 수 있습니다.
 
 ```js
 describe('addTodo', () => {
@@ -366,15 +361,15 @@ describe('addTodo', () => {
 })
 ```
 
-## Using the New Todos Slice
+## 새로운 Todos Slice사용
 
-### Updating the Root Reducer
+### Root Reducer 업데이트
 
 We have a shiny new todos reducer function, but it isn't hooked up to anything yet.
 
 The first step is to go update our root reducer to use the reducer from the todos slice instead of the original reducer. We just need to change the import statement in `reducers/index.js`:
 
-> - [Use the todos slice reducer](https://github.com/reduxjs/rtk-convert-todos-example/commit/7b6e005377c856d7415e328387188260330ebae4)
+> - [todos slice reducer 사용](https://github.com/reduxjs/rtk-convert-todos-example/commit/7b6e005377c856d7415e328387188260330ebae4)
 
 ```diff
 import { combineReducers } from 'redux'
@@ -437,17 +432,20 @@ const AddTodo = ({ addTodo }) => {
 export default connect(null, mapDispatch)(AddTodo)
 ```
 
-We start by importing the correct `addTodo` action creator from our todos slice.
-
+todoSlice에서 `addTodo`액션 생성자를 가져옵니다.
 The input is now being handled as a standard "controlled input", with the text value being stored in the component's state. We can use that state text value in the form's submit handler.
 
 Finally, we use the ["object shorthand" form of `mapDispatch`](https://react-redux.js.org/using-react-redux/connect-mapdispatch#defining-mapdispatchtoprops-as-an-object) to simplify passing the action creators to `connect`. The "bound" version of `addTodo` is passed in to the component as a prop, and it will dispatch the action as soon as we call it.
 
-### Updating the Todo List
+입력은 이제 표준 "제어 입력"으로 처리되고 텍스트 값은 구성 요소의 상태에 저장됩니다. 양식의 제출 핸들러에서 해당 상태 텍스트 값을 사용할 수 있습니다.
 
-The `TodoList` and `VisibleTodoList` components have similar issues: they're using the older `toggleTodo` action creator, and the `connect` setup isn't using the "object shorthand" form of `mapDispatch`. We can fix both of those.
+마지막으로 ["object shorthand"의 `mapDispatch`](https://react-redux.js.org/using-react-redux/connect-mapdispatch#defining-mapdispatchtoprops-as-an-object)의 형식을 사용합니다. 액션 생성자를 '연결'에 전달하는 것을 단순화합니다. `addTodo`의 "바운드"버전은 컴포넌트에 소품으로 전달되며, 호출하자마자 액션을 전달합니다.
 
-> - [Update TodoList to dispatch the new toggle action type](https://github.com/reduxjs/rtk-convert-todos-example/commit/b47b2124d6a28386b7461bccb9216682a81edb3e)
+### Todo List 업데이트
+
+`TodoList` 및`VisibleTodoList` 구성 요소에는 유사한 문제가 있습니다. 이전`toggleTodo` 작업 생성기를 사용하고 있으며`connect` 설정은`mapDispatch`의 "개체 축약"형식을 사용하지 않습니다. 둘 다 고칠 수 있습니다.
+
+> -[새로운 토글 액션 유형을 전달하도록 TodoList 업데이트](https://github.com/reduxjs/rtk-convert-todos-example/commit/b47b2124d6a28386b7461bccb9216682a81edb3e)
 
 ```diff
 // VisibleTodoList.js
@@ -462,15 +460,15 @@ The `TodoList` and `VisibleTodoList` components have similar issues: they're usi
 
 And with that, we should now be able to add and toggle todos again, but using our new todos slice!
 
-## Creating and Using the Filters Slice
+## Filters Slice 생성 및 사용
 
-Now that we've created the todos slice and hooked it up to the UI, we can do the same for the filter selection logic as well.
+todoSlice를 생성하고 UI에 연결 했으므로 이제 필터 선택 로직에 대해서도 동일한 작업을 수행 할 수 있습니다.
 
-### Writing the Filters Slice
+### 필터 슬라이스 작성
 
-The filter logic is really simple. We have one action, which sets the current filter value by returning what's in the action. Here's the whole slice:
+필터 로직은 정말 간단합니다. 액션에있는 것을 반환하여 현재 필터 값을 설정하는 액션이 ​​하나 있습니다. 다음은 전체 조각입니다.
 
-> - [Add the filters slice](https://github.com/reduxjs/rtk-convert-todos-example/commit/b77f4155e3b45bce24d0d0ef6e2f7b0c3bd11ee1)
+>-[필터 슬라이스 추가](https://github.com/reduxjs/rtk-convert-todos-example/commit/b77f4155e3b45bce24d0d0ef6e2f7b0c3bd11ee1)
 
 ```js
 import { createSlice } from '@reduxjs/toolkit'
@@ -496,13 +494,13 @@ export const { setVisibilityFilter } = filtersSlice.actions
 export default filtersSlice.reducer
 ```
 
-We've copied over the `VisibilityFilters` enum object that was originally in `actions/index.js`. The slice code just creates the one reducer, we export the action creator and reducer, and we're done.
+원래`actions / index.js`에 있던`VisibilityFilters` 열거 형 객체를 복사했습니다. 슬라이스 코드는 하나의 reducer를 생성하고 액션 생성기와 reducer를 내보내면 완료됩니다.
 
-### Using the Filters Slice
+### 필터 슬라이스 사용
 
-As with the todos reducer, we need to import and add the visibility reducer to our root reducer:
+할일 reducer와 마찬가지로 가시성 reducer를 가져 와서 루트 reducer에 추가해야합니다.
 
-> - [Use the filters slice reducer](https://github.com/reduxjs/rtk-convert-todos-example/commit/623c47b1987914a1d90142824892686ec76c20a1)
+>-[필터 슬라이스 reducer 사용](https://github.com/reduxjs/rtk-convert-todos-example/commit/623c47b1987914a1d90142824892686ec76c20a1)
 
 ```diff
 import todosReducer from 'features/todos/todosSlice'
@@ -516,11 +514,11 @@ export default combineReducers({
 })
 ```
 
-From there, we need to dispatch the `setVisibilityFilter` action when the user clicks on the buttons. First, for consistency, we should update `VisibleTodoList.js` and `Footer.js` to use the `VisibilityFilter` enum that's exported from the filter slice file, instead of the one from the actions file.
+여기에서 사용자가 버튼을 클릭 할 때`setVisibilityFilter` 액션을 전달해야합니다. 먼저 일관성을 위해 액션 파일 대신 필터 슬라이스 파일에서 내 보낸`VisibilityFilter` 열거 형을 사용하도록`VisibleTodoList.js` 및`Footer.js`를 업데이트해야합니다.
 
-From there, the link components will take just a bit more work. `FilterLink` is currently creating new functions that capture the current value of `ownProps.filter`, so that `Link` is just getting a function called `onClick`. While that's a valid way to do it, for consistency we'd like to continue using the object shorthand form of `mapDispatch`, and modify `Link` to pass the filter value in when it dispatches the action.
+거기에서 링크 구성 요소는 조금 더 많은 작업이 필요합니다. `FilterLink`는 현재`ownProps.filter`의 현재 값을 캡처하는 새 함수를 만들고 있으므로`Link`는`onClick`이라는 함수 만 가져옵니다. 이것이 유효한 방법이지만 일관성을 위해`mapDispatch`의 객체 축약 형을 계속 사용하고 액션을 전달할 때 필터 값을 전달하도록`Link`를 수정하고 싶습니다.
 
-> - [Use the new filters action in the UI](https://github.com/reduxjs/rtk-convert-todos-example/commit/776b39088384513ff68af41039fe5fc5188fe8fb)
+>-[UI에서 새 필터 액션 사용](https://github.com/reduxjs/rtk-convert-todos-example/commit/776b39088384513ff68af41039fe5fc5188fe8fb)
 
 ```diff
 // FilterLink.js
@@ -562,25 +560,25 @@ Link.propTypes = {
 export default Link
 ```
 
-Again, note that most of this doesn't have to do with RTK specifically, but it's good to try to consistently use some of the recommended best practices in this example code.
+다시 말하지만, 이것의 대부분은 RTK와 특별히 관련이 없지만 이 예제 코드에서 권장되는 모범 사례 중 일부를 일관되게 사용하는 것이 좋습니다.
 
-With that done, we should be able to add a couple todos, toggle the state of some of them, and then switch the filters to change the display list.
+완료되면 몇 가지 할 일을 추가하고 일부 상태를 전환 한 다음 필터를 전환하여 표시 목록을 변경할 수 있습니다.
 
-## Optimizing Todo Filtering
+## 할일 필터링 최적화
 
-The `VisibleTodoList` component currently uses a function called `getVisibleTodos` to do the work of filtering the todos array for display. This is a "selector function", as described in the Redux docs page on [Computing Derived Data](https://redux.js.org/recipes/computing-derived-data). It encapsulates the process of reading values from the Redux store and extracting part or all of those values for use.
+`VisibleTodoList` 구성 요소는 현재`getVisibleTodos`라는 함수를 사용하여 표시 할 할 일 배열을 필터링하는 작업을 수행합니다. 이것은 [Computing Derived Data](https://redux.js.org/recipes/computing-derived-data)의 Redux 문서 페이지에 설명 된 "선택기 기능"입니다. Redux 저장소에서 값을 읽고 사용할 값의 일부 또는 전부를 추출하는 프로세스를 캡슐화합니다.
 
-However, the code as currently written has a problem. If the filter is set to `SHOW_COMPLETED` or `SHOW_ACTIVE`, it will _always_ return a new array _every_ time it is called. Since it's being used in a `mapState` function, that means it will return a new array reference when _any_ action is dispatched.
+그러나 현재 작성된 코드에는 문제가 있습니다. 필터가`SHOW_COMPLETED` 또는`SHOW_ACTIVE`로 설정되면 _ 항상 _ 호출 될 때마다 _ 새로운 배열을 반환합니다. `mapState` 함수에서 사용되기 때문에 _any_ 액션이 전달 될 때 새로운 배열 참조를 반환합니다.
 
-In this tiny todo example app, that isn't a problem. The only actions we have involve altering the todos list or filtering it, anyway. But, in a real app, many other actions will be dispatched. Imagine if this todo app had a counter in it, and `"INCREMENT"` was dispatched while the list is filtered. We would create a new list, and the `TodoList` would have to re-render even though nothing changed.
+이 작은 할일 예제 앱에서는 문제가되지 않습니다. 우리가 가진 유일한 작업은 어쨌든 할 일 목록을 변경하거나 필터링하는 것입니다. 그러나 실제 앱에서는 다른 많은 작업이 전달됩니다. 이 할일 앱에 카운터가 있고 목록이 필터링되는 동안` "INCREMENT"`가 전달되었다고 상상해보십시오. 우리는 새로운 목록을 생성하고, 아무것도 변경되지 않았더라도`TodoList`를 다시 렌더링해야합니다.
 
-While this isn't a real performance issue now, it's worth showing how we can improve the behavior.
+이것이 실제 성능 문제는 아니지만 어떻게 행동을 개선 할 수 있는지 보여줄 가치가 있습니다.
 
-Redux apps commonly use a library called [Reselect](https://github.com/reduxjs/reselect), which has a `createSelector` function that lets you define "memoized" selector functions. These memoized selectors only recalculate values if the inputs have actually changed.
+Redux 앱은 일반적으로 'memoized'선택기 함수를 정의 할 수있는 'createSelector'함수가있는 [Reselect](https://github.com/reduxjs/reselect)라는 라이브러리를 사용합니다. 이러한 메모 된 선택기는 입력이 실제로 변경된 경우에만 값을 다시 계산합니다.
 
-RTK re-exports the `createSelector` function from Reselect, so we can import that and use it in `VisibleTodoList`.
+RTK는 Reselect에서`createSelector` 함수를 다시 내보내므로이를 가져와`VisibleTodoList`에서 사용할 수 있습니다.
 
-> - [Convert visible todos to a memoized selector](https://github.com/reduxjs/rtk-convert-todos-example/commit/4fc943b7111381974f20f74750a114b5e52ce1b2)
+>-[표시된 할 일을 memoized된 선택기로 변환](https://github.com/reduxjs/rtk-convert-todos-example/commit/4fc943b7111381974f20f74750a114b5e52ce1b2)
 
 ```diff
 import { connect } from 'react-redux'
@@ -629,26 +627,26 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = { toggleTodo }
 ```
 
-First, we import `createSelector` from RTK, and define a couple one-line selector functions that grab the `todos` and `visibilityFilter` fields from their `state` argument.
+먼저 RTK에서`createSelector`를 가져오고`state` 인수에서`todos` 및`visibilityFilter` 필드를 가져 오는 두 개의 한 줄 선택기 함수를 정의합니다.
 
-We then call `createSelector`, and pass those two small selector functions in the "input selectors" array. `createSelector` will call those, take the return values, and pass those to the "output selector" we've defined, which can then do the filtering and return the final result.
+그런 다음`createSelector`를 호출하고 "입력 선택자"배열에있는 두 개의 작은 선택자 함수를 전달합니다. `createSelector`는이를 호출하고 반환 값을 가져 와서 우리가 정의한 "출력 선택자"에 전달하면 필터링을 수행하고 최종 결과를 반환 할 수 있습니다.
 
-There's a couple small changes in how this is defined and used. While you can give selector functions any name you want, `selectX` is a more common naming convention than `getX`. Also, because the input selectors take care of reading the necessary values, we can just call `selectVisibleTodos(state)`, with `state` as the only argument.
+이것이 정의되고 사용되는 방법에 몇 가지 작은 변화가 있습니다. 선택기 함수에 원하는 이름을 지정할 수 있지만`selectX`는`getX`보다 일반적인 명명 규칙입니다. 또한 입력 선택기가 필요한 값을 읽는 것을 처리하므로 'state'를 유일한 인수로 사용하여 'selectVisibleTodos (state)'를 호출 할 수 있습니다.
 
-If we re-run the app, the filtering logic _should_ work exactly the same as before from what you can see in the UI.
+앱을 다시 실행하면 필터링 로직이 _should_ UI에서 볼 수있는 것과 동일하게 작동합니다.
 
-## Cleanup
+## 정리
 
-That's the end of the actual conversion work. We now have a bunch of action and reducer files that are no longer being used, so we should delete those to clean up the project.
+이것이 실제 변환 작업의 끝입니다. 이제 더 이상 사용되지 않는 액션 및 리듀서 파일이 많이 있으므로 프로젝트를 정리하기 위해 삭제해야합니다.
 
-We can safely remove `actions/index.js`, `reducers/todos.js`, `reducers/visibilityFilter.js`, and the associated test files.
+`actions / index.js`,`reducers / todos.js`,`reducers / visibilityFilter.js` 및 관련 테스트 파일을 안전하게 제거 할 수 있습니다.
 
-We can also try completely switching from the "folder-by-type" structure to a "feature folder" structure, by moving all of the component files into the matching feature folders.
+또한 모든 구성 요소 파일을 일치하는 기능 폴더로 이동하여 "유형별 폴더"구조에서 "기능 폴더"구조로 완전히 전환 할 수 있습니다.
 
-> - [Remove unused action and reducer files](https://github.com/reduxjs/rtk-convert-todos-example/commit/fbc0b965949e082748b8613b734612226ffe9e94)
-> - [Consolidate components into feature folders](https://github.com/reduxjs/rtk-convert-todos-example/commit/138cc162b1cc9c64ab67fae0a1171d07940414e6)
+>-[사용하지 않는 액션 및 reducer 파일 제거](https://github.com/reduxjs/rtk-convert-todos-example/commit/fbc0b965949e082748b8613b734612226ffe9e94)
+>-[컴포넌트를 feature 폴더로 통합](https://github.com/reduxjs/rtk-convert-todos-example/commit/138cc162b1cc9c64ab67fae0a1171d07940414e6)
 
-If we do that, the final source code structure looks like this:
+그렇게하면 최종 소스 코드 구조는 다음과 같습니다.
 
 - `/src`
   - `/components`
@@ -670,9 +668,9 @@ If we do that, the final source code structure looks like this:
     - `index.js`
   - `index.js`
 
-Everyone has different preferences on what makes a "maintainable" folder structure, but overall that result looks pretty consistent and easy to follow.
+모든 사람이 "유지 관리가 가능한"폴더 구조를 만드는 것에 대한 선호도가 다르지만 전반적으로 그 결과는 매우 일관되고 따르기 쉽습니다.
 
-Now, let's see the final version of the code in action!
+이제 실제 코드의 최종 버전을 살펴 보겠습니다!
 
 <iframe src="https://codesandbox.io/embed/rtk-convert-todos-example-uqqy3?fontsize=14&hidenavigation=1&module=%2Fsrc%2Ffeatures%2Ftodos%2FtodosSlice.js&theme=dark&view=editor"
      style={{ width: '100%', height: '500px', border: 0, borderRadius: '4px', overflow: 'hidden' }}
@@ -681,15 +679,15 @@ Now, let's see the final version of the code in action!
      sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"
 ></iframe>
 
-## Summary
+## 요약
 
-In this tutorial, you saw:
+이 자습서에서는 다음을 확인했습니다.
 
-- How to use RTK in a typical React application, including adding the package, writing "slice" files, and dispatching actions from React components
-- How to use "mutable" reducers, prepare action payloads, and write selector functions
-- Some techniques for simplifying React-Redux code, like using the "object shorthand" form of `mapDispatch`
-- Examples of using a "feature folder" structure for organizing your code.
+-패키지 추가, "슬라이스"파일 작성, React 컴포넌트에서 액션 디스패치 등 일반적인 React 애플리케이션에서 RTK를 사용하는 방법
+- "변경 가능한"감속기 사용, 작업 페이로드 준비 및 선택기 함수 작성 방법
+-`mapDispatch`의 "object shorthand"형식을 사용하는 것과 같이 React-Redux 코드를 단순화하는 몇 가지 기술
+-코드 구성을 위해 "기능 폴더"구조를 사용하는 예.
 
-Hopefully that has helped illustrate how to actually use these methods in practice.
+실제로 이러한 방법을 실제로 사용하는 방법을 설명하는 데 도움이 되었기를 바랍니다.
 
-Coming soon: an Advanced Tutorial, where we'll look at how to use RTK in an app that does async data fetching and uses TypeScript.
+곧 제공 될 예정 : 고급 자습서, 비동기 데이터 가져 오기를 수행하고 TypeScript를 사용하는 앱에서 RTK를 사용하는 방법을 살펴볼 것입니다.
