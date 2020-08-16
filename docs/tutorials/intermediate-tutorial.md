@@ -325,7 +325,7 @@ export const addTodo = createAction('ADD_TODO', text => {
 
 **'prepare callback'은 내부에 'payload'라는 필드가있는 객체를 반환해야합니다.** 그렇지 않으면 작업의 페이로드가 정의되지 않습니다. 또한 액션과 관련된 추가 메타 데이터를 포함하는 데 사용할 수있는 'meta'라는 필드도 포함 할 수 있습니다.
 
-`createSlice`를 사용하는 경우 자동으로`createAction`을 호출합니다. 여기에서 페이로드를 사용자 정의해야하는 경우에는 감속기 함수 자체가 아닌`reducer` 및`prepare` 함수를 포함하는 객체를`reducers` 객체에 전달하면됩니다.
+`createSlice`를 사용하는 경우 자동으로`createAction`을 호출합니다. 여기에서 페이로드를 사용자 정의해야하는 경우에는 reducer 함수 자체가 아닌`reducer` 및`prepare` 함수를 포함하는 객체를`reducers` 객체에 전달하면됩니다.
 
 ```js
 let nextTodoId = 0
@@ -684,7 +684,7 @@ const mapDispatchToProps = { toggleTodo }
 이 자습서에서는 다음을 확인했습니다.
 
 -패키지 추가, "슬라이스"파일 작성, React 컴포넌트에서 액션 디스패치 등 일반적인 React 애플리케이션에서 RTK를 사용하는 방법
-- "변경 가능한"감속기 사용, 작업 페이로드 준비 및 선택기 함수 작성 방법
+- "변경 가능한"reducer 사용, 작업 페이로드 준비 및 선택기 함수 작성 방법
 -`mapDispatch`의 "object shorthand"형식을 사용하는 것과 같이 React-Redux 코드를 단순화하는 몇 가지 기술
 -코드 구성을 위해 "기능 폴더"구조를 사용하는 예.
 
