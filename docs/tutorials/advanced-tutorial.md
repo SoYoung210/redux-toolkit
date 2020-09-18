@@ -5,34 +5,34 @@ sidebar_label: Advanced Tutorial
 hide_title: true
 ---
 
-# Advanced Tutorial: Redux Toolkit in Practice
+# 심화 튜토리얼 : Redux Toolkit in Practive
 
-In the [Intermediate Tutorial](./intermediate-tutorial.md), you saw how to use Redux Toolkit in a typical basic React app, as well as how to convert some existing plain Redux code to use RTK instead. You also saw how to write "mutative" immutable updates in reducer functions, and how to write a "prepare callback" to generate an action payload.
+[중급 튜토리얼](./ intermediate-tutorial.md) 에서 일반적인 기본 React 앱에서 Redux Toolkit을 사용하는 방법과 기존의 일반 Redux 코드를 RTK를 대신 사용하도록 변환하는 방법을 확인했습니다. 또한 감속기 함수에서 "변형"불변 업데이트를 작성하는 방법과 작업 페이로드를 생성하기 위해 "콜백 준비"를 작성하는 방법도 살펴 보았습니다.
 
-In this tutorial, you'll see how to use Redux Toolkit as part of a larger "real world" app that is bigger than a todo list example. This tutorial will show several concepts:
+이 튜토리얼에서는 할일 목록 예제보다 더 큰 "실제"앱의 일부로 Redux Toolkit을 사용하는 방법을 볼 수 있습니다. 이 튜토리얼은 몇 가지 개념을 보여줍니다:
 
-- How to convert a "plain React" app to use Redux
-- How async logic like data fetching fits into RTK
-- How to use RTK with TypeScript
+- Redux를 사용하기 위해 "plain React"앱을 변환하는 방법
+- 데이터 fetch와 같은 비동기 로직이 RTK에 적합한 방식
+- TypeScript로 RTK를 사용하는 방법
 
-In the process, we'll look at a few examples of TypeScript techniques you can use to improve your code, and we'll see how to use the new [React-Redux hooks APIs](https://react-redux.js.org/api/hooks) as an alternative to [the traditional `connect` API](https://react-redux.js.org/api/connect).
+이 과정에서 코드를 개선하는 데 사용할 수있는 TypeScript 기술의 몇 가지 예를 살펴보고 [기존`connect` API](https://react-redux.js.org/api/connect) 대신 새로운 [React-Redux Hooks API](https://react-redux.js.org/api/hooks)를 사용하는 방법을 살펴 보겠습니다.
 
-> **Note**: This is not a complete tutorial on how to use TypeScript in general or with Redux specifically, and the examples shown here do not try to achieve 100% complete type safety. For further information, please refer to community resources such as the [React TypeScript Cheatsheet](https://github.com/typescript-cheatsheets/react-typescript-cheatsheet) and the [React/Redux TypeScript Guide](https://github.com/piotrwitek/react-redux-typescript-guide).
+> ** 참고 ** : 이것은 TypeScript를 일반적으로 또는 특별히 Redux와 함께 사용하는 방법에 대한 완전한 문서가 아니며 여기에 표시된 예제는 100% 완전한 type 안전성을 달성하려고 시도하지 않습니다. 자세한 내용은 [React TypeScript Cheatsheet](https://github.com/typescript-cheatsheets/react-typescript-cheatsheet) 및 [React / Redux TypeScript 가이드](https://github.com/piotrwitek/react-redux-typescript-guide).
 >
-> In addition, this tutorial does not mean you _must_ convert your React app logic completely to Redux. [It's up to you to decide what state should live in React components, and what should be in Redux](https://redux.js.org/faq/organizing-state#do-i-have-to-put-all-my-state-into-redux-should-i-ever-use-reacts-setstate). This is just an example of how you _could_ convert logic to use Redux if you choose to.
 
-The complete source code for the converted application from this tutorial is available at [github.com/reduxjs/rtk-github-issues-example](https://github.com/reduxjs/rtk-github-issues-example). We'll be walking through the conversion process as shown in this repo's history. Links to meaningful individual commits will be highlighted in quote blocks, like this:
+> 또한이 튜토리얼은 React 앱 로직을 Redux로 완전히 변환해야한다는 의미는 아닙니다. [React 컴포넌트에 어떤 상태가 있어야하고 Redux에 무엇이 있어야하는지는 사용자가 결정합니다.](https://redux.js.org/faq/organizing-state#do-i-have-to-put-all-my-state-into-redux-should-i-ever-use-reacts-setstate). 이것은 당신이 원한다면 Redux를 사용하도록 로직을 변환하는 방법의 예일뿐입니다.
 
-> - Commit message here
+이 가이드에서 변환 된 애플리케이션의 전체 소스 코드는 [github.com/reduxjs/rtk-github-issues-example](https://github.com/reduxjs/rtk-github-issues-example)에서 확인할 수 있습니다. 이 리포지토리의 역사에 표시된대로 변환 프로세스를 살펴 보겠습니다. 의미있는 개별 커밋에 대한 링크는 다음과 같이 따옴표 블록으로 강조 표시됩니다.
 
-## Reviewing the Starting Example Application
+>-여기에 메시지 커밋
 
-The example application for this tutorial is a Github Issues viewer app. It allows the user to enter the names of a Github org and repository, fetch the current list of open issues, page through the issues list, and view the contents and comments of a specific issue.
+## 시작 예제 애플리케이션 검토
 
-The starting commit for this application is a plain React implementation that uses function components with hooks for state and side effects like data fetching. The code is already written in TypeScript, and the styling is done via CSS Modules.
+이 튜토리얼의 예제 애플리케이션은 Github 이슈 뷰어 앱입니다. 사용자는 Github 조직 및 리포지토리의 이름을 입력하고, 현재 진행중인 문제 목록을 가져오고, 문제 목록을 페이지로 이동하고, 특정 문제의 내용과 댓글을 볼 수 있습니다.
 
-Let's start by viewing the original plain React app in action:
+이 애플리케이션의 시작 커밋은 데이터 가져 오기와 같은 상태 및 부작용에 대한 후크가있는 함수 구성 요소를 사용하는 일반 React 구현입니다. 코드는 이미 TypeScript로 작성되었으며 스타일 지정은 CSS 모듈을 통해 수행됩니다.
 
+작동중인 원래의 일반 React 앱을 살펴 보겠습니다.
 <iframe src="https://codesandbox.io/embed/rsk-github-issues-example-8jf6d?fontsize=14&hidenavigation=1&theme=dark&view=preview"
      style={{ width: '100%', height: '500px', border: 0, borderRadius: '4px', overflow: 'hidden' }}
      title="rtk-github-issues-example-01-plain-react"
@@ -40,38 +40,38 @@ Let's start by viewing the original plain React app in action:
      sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"
 ></iframe>
 
-### React Codebase Source Overview
+### React Codebase 소스 개요
 
-The codebase is already laid out in a "feature folder" structure, The main pieces are:
+코드베이스는 이미 "기능 폴더"구조로 배치되어 있습니다. 주요 부분은 다음과 같습니다.
 
-- `/api`: fetching functions and TS types for the Github Issues API
-- `/app`: main `<App>` component
-- `/components`: components that are reused in multiple places
-- `/features`
-  - `/issueDetails:` components for the Issue Details page
-  - `/issuesList`: components for the Issues List display
-  - `/repoSearch`: components for the Repo Search form
-- `/utils`: various string utility functions
+-`/api` : Github Issues API에 대한 함수 및 TS 유형 가져 오기
+-`/app` : 기본`<App>`구성 요소
+-`/components` : 여러 곳에서 재사용되는 컴포넌트
+-`/features`
+  -`/issueDetails :`이슈 세부 정보 페이지의 구성 요소
+  -`/issuesList` : 이슈 목록 표시를위한 구성 요소
+  -`/repoSearch` : Repo Search 폼의 구성 요소
+-`/utils` : 다양한 문자열 유틸리티 기능
 
-## Setting Up the Redux Store
+## Redux Store 설정
 
-Since this app doesn't yet use Redux at all, the first step is to install Redux Toolkit and React-Redux. Since this is a TypeScript app, we'll also need to add `@types/react-redux` as well. Add those packages to the project via either Yarn or NPM.
+이 앱은 아직 Redux를 전혀 사용하지 않기 때문에 첫 번째 단계는 Redux Toolkit과 React-Redux를 설치하는 것입니다. 이것은 TypeScript 앱이므로`@ types / react-redux`도 추가해야합니다. Yarn 또는 NPM을 통해 해당 패키지를 프로젝트에 추가하십시오.
 
-> - [Add Redux Toolkit and React-Redux packages](https://github.com/reduxjs/rtk-github-issues-example/compare/Add_Redux_Toolkit_and_React-Redux_packages~1..reduxjs:Add_Redux_Toolkit_and_React-Redux_packages)
+>-[Redux Toolkit 및 React-Redux 패키지 추가] (https://github.com/reduxjs/rtk-github-issues-example/compare/Add_Redux_Toolkit_and_React-Redux_packages~1..reduxjs:Add_Redux_Toolkit_and_React-Redux_packages)
 
-Next, we need to set up the usual pieces: a root reducer function, the Redux store, and the `<Provider>` to make that store available to our component tree.
+다음으로 루트 리듀서 함수, Redux 스토어, 그리고 컴포넌트 트리에서 해당 스토어를 사용할 수 있도록`<Provider>`와 같은 일반적인 부분을 설정해야합니다.
 
-In the process, we're going to set up "Hot Module Replacement" for our app. That way, whenever we make a change to the reducer logic or the component tree, Create-React-App will rebuild the app and swap the changed code into our running app, without having to completely refresh the page.
+이 과정에서 앱에 대한 "핫 모듈 교체"를 설정합니다. 이렇게하면 리듀서 로직이나 구성 요소 트리를 변경할 때마다 Create-React-App이 페이지를 완전히 새로 고칠 필요없이 앱을 다시 빌드하고 변경된 코드를 실행중인 앱으로 스왑합니다.
 
-#### Creating the Root Reducer
+#### Root Reducer 만들기
 
-> - [Add store and root reducer with reducer HMR](https://github.com/reduxjs/rtk-github-issues-example/compare/Add_store_and_root_reducer_with_reducer_HMR~1..reduxjs:Add_store_and_root_reducer_with_reducer_HMR)
+>-[Reducer HMR로 저장소 및 루트 감속기 추가] (https://github.com/reduxjs/rtk-github-issues-example/compare/Add_store_and_root_reducer_with_reducer_HMR~1..reduxjs:Add_store_and_root_reducer_with_reducer_HMR)
 
-First, we'll create the root reducer function. We don't have any slices yet, so it will just return an empty object.
+먼저 루트 감속기 함수를 만듭니다. 아직 슬라이스가 없으므로 빈 객체를 반환합니다.
 
-However, we're going to want to know what the TypeScript type is for that root state object, because we need to declare what the type of the `state` variable is whenever our code needs to access the Redux store state (such as in `mapState` functions, `useSelector` selectors, and `getState` in thunks).
+그러나 우리 코드가 Redux 저장소 상태에 액세스해야 할 때마다 'state'변수의 유형을 선언해야하기 때문에 해당 루트 상태 객체에 대한 TypeScript 유형이 무엇인지 알고 싶습니다 (예 : `mapState` 함수,`useSelector` 선택기 및 썽크의`getState`).
 
-We could manually write a TS type with the correct types for each state slice, but we'd have to keep updating that type every time we make any change to the state structure in our slices. Fortunately, TS is usually pretty good at inferring types from the code we've already written. In this case, we can define a type that says "this type is whatever gets returned from `rootReducer`", and TS will automatically figure out whatever that contains as the code is changed. If we export that type, other parts of the app can use it, and we know that it's up to date. All we have to do is use the built-in TS `ReturnType` utility type, and feed in "the type of the `rootReducer` function" as its generic argument.
+각 상태 슬라이스에 대해 올바른 유형으로 TS 유형을 수동으로 작성할 수 있지만 슬라이스의 상태 구조를 변경할 때마다 해당 유형을 계속 업데이트해야합니다. 다행히 TS는 우리가 이미 작성한 코드에서 유형을 추론하는 데 일반적으로 능숙합니다. 이 경우 "이 유형은`rootReducer`에서 반환되는 모든 유형입니다"라는 유형을 정의 할 수 있으며, TS는 코드가 변경됨에 따라 포함 된 내용을 자동으로 파악합니다. 해당 유형을 내 보내면 앱의 다른 부분에서 사용할 수 있으며 최신 상태임을 압니다. 우리가해야 할 일은 내장 TS`ReturnType` 유틸리티 유형을 사용하고 "`rootReducer` 함수 유형"을 일반 인수로 입력하는 것입니다.
 
 **app/rootReducer.ts**
 
@@ -85,9 +85,9 @@ export type RootState = ReturnType<typeof rootReducer>
 export default rootReducer
 ```
 
-#### Store Setup and HMR
+#### 스토어 설정 및 HMR
 
-Next, we'll create the store instance, including hot-reloading the root reducer. By using the [`module.hot` API for reloading](https://webpack.js.org/concepts/hot-module-replacement/), we can re-import the new version of the root reducer function whenever it's been recompiled, and tell the store to use the new version instead.
+다음으로 루트 리듀서의 핫 리로딩을 포함하여 스토어 인스턴스를 생성합니다. [`module.hot` API for reloading] (https://webpack.js.org/concepts/hot-module-replacement/)을 사용하여 루트 감속기 함수의 새 버전을 언제든지 다시 가져올 수 있습니다. 다시 컴파일하고 대신 새 버전을 사용하도록 상점에 알립니다.
 
 **app/store.ts**
 
@@ -112,15 +112,15 @@ export type AppDispatch = typeof store.dispatch
 export default store
 ```
 
-The `require('./rootReducer').default` looks a bit odd. That's because we're mixing CommonJS synchronous import syntax with ES modules, so the "default export" is in a object field called `default`. We could probably also have used `import()` and handled the reducer replacement asynchronously as well.
+`require ( './ rootReducer'). default`는 약간 이상해 보입니다. 이는 CommonJS 동기 가져 오기 구문을 ES 모듈과 혼합하기 때문에 "기본 내보내기"는`default`라는 개체 필드에 있습니다. 우리는 아마도`import ()`를 사용하고 감속기 교체를 비동기 적으로 처리했을 수도 있습니다.
 
-#### Rendering the `Provider`
+####`Provider` 렌더링
 
-Now that the store has been created, we can add it to the React component tree.
+이제 저장소가 생성되었으므로 React 컴포넌트 트리에 추가 할 수 있습니다.
 
-> - [Render Redux Provider with app HMR](https://github.com/reduxjs/rtk-github-issues-example/compare/Render_Redux_Provider_with_app_HMR~1..reduxjs:Render_Redux_Provider_with_app_HMR)
+>-[Render Redux Provider with app HMR] (https://github.com/reduxjs/rtk-github-issues-example/compare/Render_Redux_Provider_with_app_HMR~1..reduxjs:Render_Redux_Provider_with_app_HMR)
 
-As with the root reducer, we can hot-reload the React component tree whenever a component file changes. The best way is to write a function that imports the `<App>` component and renders it, call that once on startup to show the React component tree as usual, and then reuse that function any time a component is changed.
+루트 리듀서와 마찬가지로 컴포넌트 파일이 변경 될 때마다 React 컴포넌트 트리를 핫 리로드 할 수 있습니다. 가장 좋은 방법은`<App>`구성 요소를 가져 와서 렌더링하는 함수를 작성하고 시작시 한 번 호출하여 평소와 같이 React 구성 요소 트리를 표시 한 다음 구성 요소가 변경 될 때마다 해당 함수를 재사용하는 것입니다.
 
 **index.tsx**
 
@@ -151,31 +151,32 @@ if (process.env.NODE_ENV === 'development' && module.hot) {
 }
 ```
 
-## Converting the Main App Display
 
-With the main store setup done, we can now start converting the actual app logic to use Redux.
+## 메인 앱 디스플레이 변환
 
-### Evaluating the Existing App State
+메인 스토어 설정이 완료되면 이제 실제 앱 로직을 Redux를 사용하도록 변환 할 수 있습니다.
 
-Currently, the top-level <`App>` component uses React `useState` hooks to store several pieces of info:
+### 기존 앱 상태 평가
 
-- The selected Github org and repo
-- The current issues list page number
-- Whether we're viewing the issues list, or the details for a specific issue
+현재 최상위 <`App>`구성 요소는 React`useState` 후크를 사용하여 여러 정보를 저장합니다.
 
-Meanwhile, the `<RepoSearchForm>` component also uses state hooks to store the work-in-progress values for the controlled form inputs.
+-선택한 Github 조직 및 저장소
+-현재 호 목록 페이지 번호
+-문제 목록을 보는지 아니면 특정 문제에 대한 세부 정보를 보는지
 
-The Redux FAQ has [some rules of thumb on when it makes sense to put data into Redux](https://redux.js.org/faq/organizing-state#do-i-have-to-put-all-my-state-into-redux-should-i-ever-use-reacts-setstate). In this case, it's reasonable to extract the state values from `<App>` and put those into the Redux store. While there's only one component that uses them now, a larger app might have multiple components that care about those values. Since we've set up HMR, it would also be helpful to persist those values if we make future edits to the component tree.
+한편`<RepoSearchForm>`구성 요소는 상태 후크를 사용하여 제어 된 양식 입력에 대해 진행중인 작업 값을 저장합니다.
 
-On the other hand, while we _could_ put the WIP form values into the Redux store, there's no real benefit to doing so. Only the `<RepoSearchForm>` component cares about those values, and none of the other rules of thumb apply here. In general, [most form state probably shouldn't be kept in Redux](https://redux.js.org/faq/organizing-state#should-i-put-form-state-or-other-ui-state-in-my-store). So, we'll leave that alone.
+Redux FAQ에는 [Redux에 데이터를 넣는 것이 합리적 일 때에 대한 몇 가지 경험 규칙] (https://redux.js.org/faq/organizing-state#do-i-have-to-put-all-my -state-into-redux- 나는 항상 사용-반응 -setstate). 이 경우`<App>`에서 상태 값을 추출하여 Redux 스토어에 넣는 것이 합리적입니다. 현재이를 사용하는 구성 요소는 하나 뿐이지 만 더 큰 앱에는 해당 값을 고려하는 여러 구성 요소가있을 수 있습니다. HMR을 설정 했으므로 나중에 구성 요소 트리를 편집 할 때 해당 값을 유지하는 것도 도움이 될 것입니다.
 
-### Creating the Initial State Slices
+반면에 WIP 양식 값을 Redux 저장소에 _ 할 수는 있지만 _ 그렇게해도 실질적인 이점은 없습니다. `<RepoSearchForm>`구성 요소 만 해당 값에 관심이 있으며 다른 경험 규칙은 여기에 적용되지 않습니다. 일반적으로 [대부분의 양식 상태는 Redux에 보관해서는 안됩니다] (https://redux.js.org/faq/organizing-state#should-i-put-form-state-or-other-ui-state -in-my-store). 그래서 우리는 그것을 내버려 둘 것입니다.
 
-The first step is to look at the data that is currently being kept in `<App>`, and turn that into the types and initial state values for our "issues display" slice. From there, we can define reducers to update them appropriately.
+### 초기 상태 슬라이스 생성
 
-Let's look at the source for the whole slice, and then break down what it's doing:
+첫 번째 단계는 현재`<App>`에 보관되고있는 데이터를 살펴보고이를 "문제 표시"슬라이스의 유형과 초기 상태 값으로 바꾸는 것입니다. 거기에서 리듀서를 정의하여 적절하게 업데이트 할 수 있습니다.
 
-> - [Add initial state slice for UI display](https://github.com/reduxjs/rtk-github-issues-example/compare/Add_initial_state_slice_for_UI_display~1..reduxjs:Add_initial_state_slice_for_UI_display)
+전체 슬라이스의 소스를 살펴본 다음 어떤 작업을하는지 분석해 보겠습니다.
+
+>-[UI 표시를위한 초기 상태 슬라이스 추가](https://github.com/reduxjs/rtk-github-issues-example/compare/Add_initial_state_slice_for_UI_display~1..reduxjs:Add_initial_state_slice_for_UI_display)
 
 **features/issuesDisplay/issuesDisplaySlice.ts**
 
@@ -239,26 +240,26 @@ export const {
 export default issuesDisplaySlice.reducer
 ```
 
-#### State Contents Type Declarations
+#### 상태 내용 유형 선언
 
-The org and repo values are simple strings, and the current issues page is just a number. We will use a union of string constants to indicate if we're showing the issues list or the details of a single issue, and if it's the details, we need to know the issue ID number.
+org 및 repo 값은 단순한 문자열이며 현재 문제 페이지는 숫자 일뿐입니다. 문자열 상수의 합집합을 사용하여 문제 목록 또는 단일 문제의 세부 정보를 표시하는지 여부를 나타내며 세부 정보 인 경우 문제 ID 번호를 알아야합니다.
 
-We can define types for a couple of those pieces by themselves for reuse in the action types later, and also combine them into a larger type for the entire state we plan to track.
+나중에 액션 유형에서 재사용 할 수 있도록 이러한 부분에 대한 유형을 스스로 정의 할 수 있으며 추적하려는 전체 상태에 대해 더 큰 유형으로 결합 할 수도 있습니다.
 
-The "current display" part requires a bit of extra work, because the type listed for the state includes a page number, but the UI won't include one when it dispatches an action to switch to the issues list. So, we define a separate type for that action's contents.
+상태에 대해 나열된 유형에 페이지 번호가 포함되어 있기 때문에 "현재 표시"부분에는 약간의 추가 작업이 필요하지만 UI는 문제 목록으로 전환하는 작업을 전달할 때 하나를 포함하지 않습니다. 따라서 해당 작업의 내용에 대해 별도의 유형을 정의합니다.
 
-#### Declaring Types for Slice State and Actions
+#### 슬라이스 상태 및 작업에 대한 유형 선언
 
-`createSlice` tries to infer types from two sources:
+`createSlice`는 두 가지 소스에서 유형을 추론하려고합니다.
 
-- The state type is based on the type of the `initialState` field
-- Each reducer needs to declare the type of the action it expects to handle
+-상태 유형은 'initialState'필드의 유형을 기반으로합니다.
+-각 감속기는 처리 할 작업 유형을 선언해야합니다.
 
-The state type is used as the type for the `state` parameter in each of the case reducers and the return type for the generated reducer function, and the action types are used for the corresponding generated action creators. (Alternately, if you define a "prepare callback" alongside a reducer, the prepare callback's arguments are used for the action creator too, and the return value from the callback must match the declared type for the action the reducer expects.)
+상태 유형은 각 케이스 리듀서에서 'state'매개 변수의 유형과 생성 된 리듀서 함수의 반환 유형으로 사용되며, 해당 생성 된 액션 생성자에 대해 액션 유형이 사용됩니다. (또는 감속기와 함께 "콜백 준비"를 정의하는 경우 준비 콜백의 인수가 작업 생성자에게도 사용되며 콜백의 반환 값은 감속기가 예상하는 작업에 대해 선언 된 유형과 일치해야합니다.)
 
-The main type you will use when declaring action types in reducers is **`PayloadAction<PayloadType>`**. `createAction` uses this type as its return value.
+감속기에서 작업 유형을 선언 할 때 사용할 기본 유형은 **`PayloadAction <PayloadType>`**입니다. `createAction`은이 유형을 반환 값으로 사용합니다.
 
-Let's look at a specific reducer as an example:
+특정 감속기를 예로 들어 보겠습니다.
 
 ```ts
 setCurrentPage(state, action: PayloadAction<number>) {
@@ -266,15 +267,15 @@ setCurrentPage(state, action: PayloadAction<number>) {
 },
 ```
 
-We don't have to declare a type for `state`, because `createSlice` already knows that this should be the same type as our `initialState`: the `CurrentDisplayState` type.
+`createSlice`는 이것이 우리의`initialState` (`CurrentDisplayState` 유형)와 동일한 유형이어야한다는 것을 이미 알고 있기 때문에`state`에 대한 유형을 선언 할 필요가 없습니다.
 
-We declare that the action object is a `PayloadAction`, where `action.payload` is a `number`. Then, when we assign `state.page = action.payload`, TS knows that we're assigning a number to a number, and it works correctly. If we were to try calling `issuesDisplaySlice.actions.setCurrentPage()`, we would need to pass a number in as the argument, because that number will become the payload in the action.
+액션 객체는`PayloadAction`이며`action.payload`는`숫자`라고 선언합니다. 그런 다음`state.page = action.payload`를 할당하면 TS는 숫자에 숫자를 할당하고 있음을 알고 올바르게 작동합니다. `issuesDisplaySlice.actions.setCurrentPage ()`를 호출하려고한다면 그 숫자가 액션의 페이로드가되기 때문에 인수로 숫자를 전달해야합니다.
 
-Similarly, for `displayRepo(state, action: PayloadAction<CurrentRepo>)`, TS knows that `action.payload` is an object with `org` and `repo` string fields, and we can assign them to the state. (Remember that these "mutative" assignments are only safe and possible because `createSlice` uses Immer inside!)
+마찬가지로`displayRepo (state, action : PayloadAction <CurrentRepo>)`의 경우 TS는`action.payload`가`org` 및`repo` 문자열 필드가있는 객체임을 알고 있으며이를 상태에 할당 할 수 있습니다. (이 "mutative"할당은 'createSlice'가 내부 Immer를 사용하기 때문에 안전하고 가능합니다!)
 
-#### Using the Slice Reducer
+#### Slice Reducer 사용
 
-As with other examples, we then need to import and add the issues display slice reducer to our root reducer:
+다른 예제와 마찬가지로, 이슈 디스플레이 슬라이스 리듀서를 루트 리듀서로 가져 와서 추가해야합니다.
 
 **app/rootReducer.ts**
 
@@ -289,24 +290,23 @@ import { combineReducers } from '@reduxjs/toolkit'
 +})
 ```
 
-### Converting the Issues Display
+### 이슈 디스플레이 변환
 
-Now that the issues display slice is hooked up to the store, we can update `<App>` to use that instead of its internal component state.
+이슈 디스플레이 슬라이스가 스토어에 연결되었으므로 내부 구성 요소 상태 대신 사용하도록`<App>`을 업데이트 할 수 있습니다.
 
-> - [Convert main issues display control to Redux](https://github.com/reduxjs/rtk-github-issues-example/compare/Convert_main_issues_display_control_to_Redux~1..reduxjs:Convert_main_issues_display_control_to_Redux)
+>-[주요 이슈 디스플레이 컨트롤을 Redux로 변환](https://github.com/reduxjs/rtk-github-issues-example/compare/Convert_main_issues_display_control_to_Redux~1..reduxjs:Convert_main_issues_display_control_to_Redux)
 
-We need to make three groups of changes to the `App` component:
+`App` 구성 요소에 세 가지 그룹을 변경해야합니다.
 
-- The `useState` declarations need to be removed
-- The corresponding state values need to be read from the Redux store
-- Redux actions need to be dispatched as the user interacts with the component
+-`useState` 선언을 제거해야합니다.
+-Redux 스토어에서 해당 상태 값을 읽어야합니다.
+-사용자가 구성 요소와 상호 작용할 때 Redux 작업을 전달해야합니다.
 
-Traditionally, the last two aspects would be handled via the [React-Redux `connect` API](https://react-redux.js.org/api/connect). We'd write a `mapState` function to retrieve the data and a `mapDispatch` function to hold the action creators, pass those to `connect`, get everything as props, and then call `this.props.setCurrentPage()` to dispatch that action type.
+전통적으로 마지막 두 가지 측면은 [React-Redux`connect` API](https://react-redux.js.org/api/connect)를 통해 처리됩니다. 데이터를 검색하는`mapState` 함수와 액션 생성자를 보관하는`mapDispatch` 함수를 작성하고,이를`connect`에 전달하고, 모든 것을 props로 가져온 다음`this.props.setCurrentPage ()`를 호출하여 해당 액션 유형을 전달합니다.
 
-However, [React-Redux now has a hooks API](https://react-redux.js.org/api/hooks), which allows us to interact with the store more directly. `useSelector` lets us read data from the store and subscribe to updates, and `useDispatch` gives us a reference to the store's `dispatch` method. We'll use those throughout the rest of this tutorial.
+그러나 [React-Redux에는 이제 후크 API가 있습니다](https://react-redux.js.org/api/hooks), 스토어와보다 직접적으로 상호 작용할 수 있습니다. `useSelector`를 사용하면 스토어에서 데이터를 읽고 업데이트를 구독 할 수 있으며`useDispatch`는 스토어의`dispatch` 메소드에 대한 참조를 제공합니다. 이 튜토리얼의 나머지 부분에서이를 사용합니다.
 
-First, we'll import the necessary functions, plus the `RootState` type we declared earlier, and remove the hardcoded default org and repo strings.
-
+먼저 필요한 함수와 앞서 선언 한`RootState` 유형을 가져 와서 하드 코딩 된 기본 조직 및 저장소 문자열을 제거합니다.
 **app/App.tsx**
 
 ```diff
@@ -330,7 +330,7 @@ import { IssueDetailsPage } from 'features/issueDetails/IssueDetailsPage'
 import './App.css'
 ```
 
-Next, at the top of `App`, we'll remove the old `useState` hooks, and replace them with a call to `useDispatch` and `useSelector`:
+다음으로,`App` 상단에서 이전`useState` 후크를 제거하고`useDispatch` 및`useSelector` 호출로 대체합니다.
 
 ```diff
 const App: React.FC = () => {
@@ -347,11 +347,11 @@ const App: React.FC = () => {
 + )
 ```
 
-We pass a "selector" function into `useSelector`, which is just a function that accepts our Redux store state as its parameter and returns some result. We declare that the type of the `state` argument is the `RootState` type we defined over in the root reducer, so that TS knows what fields are inside `state`. We can retrieve the `state.issuesDisplay` slice as one piece, and destructure the result object into multiple variables inside the component.
+"selector"함수를`useSelector`에 전달합니다.이 함수는 Redux 스토어 상태를 매개 변수로 받아들이고 일부 결과를 반환하는 함수입니다. 우리는`state` 인자의 유형이 루트 감속기에서 정의한`RootState` 유형임을 선언하므로 TS는`state` 안에 어떤 필드가 있는지 알 수 있습니다. `state.issuesDisplay` 슬라이스를 하나의 조각으로 검색하고 결과 객체를 구성 요소 내부의 여러 변수로 분해 할 수 있습니다.
 
-We now have mostly the same data variables inside the component as we did before - they're just coming from the Redux store instead of `useState` hooks.
+이제 이전과 같이 컴포넌트 내부에 거의 동일한 데이터 변수가 있습니다.`useState` 후크 대신 Redux 스토어에서 온 것입니다.
 
-The last step is to dispatch Redux actions whenever the user does something, instead of calling the `useState` setters:
+마지막 단계는`useState` setter를 호출하는 대신 사용자가 무언가를 할 때마다 Redux 액션을 전달하는 것입니다.
 
 ```diff
   const setOrgAndRepo = (org: string, repo: string) => {
@@ -376,9 +376,9 @@ The last step is to dispatch Redux actions whenever the user does something, ins
   }
 ```
 
-Unlike typical `connect` + `mapDispatch` usage, here we call `dispatch()` directly, and do so by calling an action creator with the correct `payload` value and passing the resulting action to `dispatch`.
+일반적인`connect` +`mapDispatch` 사용법과 달리 여기서는`dispatch ()`를 직접 호출하고 올바른`payload` 값으로 액션 생성자를 호출하고 결과 액션을`dispatch`에 전달합니다.
 
-Let's see if this works!
+이것이 작동하는지 봅시다!
 
 <iframe  src="https://codesandbox.io/embed/rtk-github-issues-example-02-issues-display-tdx2w?fontsize=14&hidenavigation=1&module=%2Fsrc%2Fapp%2FApp.tsx&theme=dark&view=preview"
      style={{ width: '100%', height: '500px', border: 0, borderRadius: '4px', overflow: 'hidden' }}
