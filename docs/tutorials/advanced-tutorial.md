@@ -387,17 +387,17 @@ const App: React.FC = () => {
      sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"
 ></iframe>
 
-If you're thinking "hey, this looks and behaves exactly like the previous example"... then that's great! That means we've correctly converted the first bit of logic to Redux so far. If you want to confirm that there's Redux logic running, try clicking the "Open in New Window" button and inspect the store in the Redux DevTools Extension.
+"이건 이전 예제와 똑같이 보이고 동작한다"고 생각한다면... 훌륭합니다! 즉, 지금까지 논리의 첫 번째 비트를 Redux로 올바르게 변환했음을 의미합니다. Redux 로직이 실행 중인지 확인하려면 "새 창에서 열기"버튼을 클릭하고 Redux DevTools Extension에서 상점을 검사하십시오.
 
-## Converting the Issues List Page
+## 이슈 목록 페이지 변환
 
-Our next task is to convert the `<IssuesListPage>` component to fetch and store issues via Redux. Currently, `<IssuesListPage>` is storing all data in `useState` hooks, including the fetched issues. It fetches the issues by making an AJAX call in a `useEffect` hook.
+다음 작업은`<IssuesListPage>`구성 요소를 Redux를 통해 문제를 가져오고 저장하도록 변환하는 것입니다. 현재`<IssuesListPage>`는 가져온 이슈를 포함하여 모든 데이터를 `useState`hooks에 저장하고 있습니다. ʻuseEffect` 후크에서 AJAX 호출을 수행하여 문제를 가져옵니다.
 
-As mentioned at the start, there's nothing actually wrong with this! Having React components fetch and store their own data is totally fine. But, for the purposes of this tutorial, we want to see how the Redux conversion process looks.
+처음에 언급했듯이 실제로 이것에는 잘못된 것이 없습니다! React 구성 요소가 자체 데이터를 가져와 저장하는 것은 완전히 괜찮습니다. 그러나이 튜토리얼의 목적을 위해 Redux 변환 프로세스가 어떻게 보이는지보고 싶습니다.
 
-### Reviewing the Issues List Component
+### 문제 목록 구성 요소 검토
 
-Here's the initial chunk of `<IssuesListPage>`:
+다음은`<IssuesListPage>`의 초기 청크입니다.
 
 ```ts
 export const IssuesListPage = ({
@@ -450,24 +450,24 @@ export const IssuesListPage = ({
 }
 ```
 
-The `useEffect` callback defines an outer `async function fetchEverything()` and calls it immediately. This is because we can't declare the `useEffect` callback itself as async. React expects that the return value from a `useEffect` callback will be a cleanup function. Since all async functions return a `Promise` automatically, React would see that `Promise` instead, and that would prevent React from actually cleaning up correctly.
+`useEffect` 콜백은 외부 'async function fetchEverything ()'을 정의하고 즉시 호출합니다. `useEffect` 콜백 자체를 비동기로 선언 할 수 없기 때문입니다. React는 `useEffect` 콜백의 반환 값이 정리 함수가 될 것으로 예상합니다. 모든 비동기 함수는 자동으로`Promise`를 반환하기 때문에 React는 대신`Promise`를 인식하고 React가 실제로 올바르게 정리하지 못하게합니다.
 
-Inside, we define two more async functions to fetch issues and the open issues count, and call them both. We then wait for both functions to resolve successfully. (There's a few other ways we could have organized this logic, but this was sufficient for the example.)
+내부에서 이슈를 가져오고 미해결 이슈 수를 가져 오는 두 가지 비동기 함수를 더 정의하고 둘 다 호출합니다. 그런 다음 두 함수가 성공적으로 해결 될 때까지 기다립니다. (이 논리를 구성 할 수있는 몇 가지 다른 방법이 있지만 예제로는 충분했습니다.)
 
-### Thinking in Thunks
+### Thunk에서 생각하기
 
-#### What is a "Thunk"?
+#### "Thunk"란 무엇입니까?
 
-The Redux core (ie, `createStore`) is completely synchronous. When you call `store.dispatch()`, the store runs the root reducer, saves the return value, runs the subscriber callbacks, and returns, with no pause. By default, any asynchronicity has to happen outside of the store.
+Redux 코어 (즉,`createStore`)는 완전히 동 기적입니다. `store.dispatch()`를 호출하면 스토어가 루트 리듀서를 실행하고 반환 값을 저장하고 구독자 콜백을 실행하고 일시 중지없이 반환합니다. 기본적으로 모든 비동기 성은 저장소 외부에서 발생해야합니다.
 
-But, what if you want to have async logic interact with the store by dispatching or checking the current store state? That's where [Redux middleware](https://redux.js.org/advanced/middleware) come in. They extend the store, and allow you to:
+그러나 현재 스토어 상태를 디스패치하거나 확인하여 비동기 로직이 스토어와 상호 작용하게하려면 어떻게해야할까요? 이것이 바로 [Redux 미들웨어] (https://redux.js.org/advanced/middleware)가 들어오는 곳입니다. 스토어를 확장하고 다음을 수행 할 수 있습니다.
 
-- Execute extra logic when any action is dispatched (such as logging the action and state)
-- Pause, modify, delay, replace, or halt dispatched actions
-- Write extra code that has access to `dispatch` and `getState`
-- Teach `dispatch` how to accept other values besides plain action objects, such as functions and promises, by intercepting them and dispatching real action objects instead
+-조치가 전달 될 때 추가 논리 실행 (예 : 조치 및 상태 로깅)
+-디스패치 된 작업 일시 중지, 수정, 지연, 교체 또는 중지
+-`dispatch` 및`getState`에 대한 액세스 권한이있는 추가 코드 작성
+-함수 나 프라 미스와 같은 일반 액션 객체 외에 다른 값을 가로 채고 대신 실제 액션 객체를 디스패치하여 받아들이는 방법을 'dispatch'에 가르칩니다.
 
-The most common Redux middleware is [`redux-thunk`](https://github.com/reduxjs/redux-thunk). The word "thunk" means "a function that delays a calculation until later". In our case, adding the thunk middleware to our Redux store lets us pass functions directly to `store.dispatch()`. The thunk middleware will see the function, prevent it from actually reaching the "real" store, and call our function and pass in `dispatch` and `getState` as arguments. So, a "thunk function" looks like this:
+가장 일반적인 Redux 미들웨어는 [`redux-thunk`] (https://github.com/reduxjs/redux-thunk)입니다. "thunk"라는 단어는 "나중까지 계산을 지연시키는 기능"을 의미합니다. 우리의 경우 Redux 스토어에 썽크 미들웨어를 추가하면 함수를`store.dispatch ()`에 직접 전달할 수 있습니다. 썽크 미들웨어는 함수를보고 실제로 "실제"저장소에 도달하는 것을 방지하고 함수를 호출하고`dispatch` 및`getState`를 인수로 전달합니다. 따라서 "thunk function"은 다음과 같습니다.
 
 ```js
 function exampleThunkFunction(dispatch, getState) {
@@ -478,9 +478,9 @@ function exampleThunkFunction(dispatch, getState) {
 store.dispatch(exampleThunkFunction)
 ```
 
-Inside of a thunk function, you can write any code you want. The most common usage would be fetching some data via an AJAX call, and dispatching an action to load that data into the Redux store. The `async/await` syntax makes it easier to write thunks that do AJAX calls.
+thunk 함수 내에서 원하는 코드를 작성할 수 있습니다. 가장 일반적인 사용법은 AJAX 호출을 통해 일부 데이터를 가져오고 해당 데이터를 Redux 저장소에로드하는 작업을 보내는 것입니다. ʻasync / await` 구문을 사용하면 AJAX 호출을 수행하는 썽크를 더 쉽게 작성할 수 있습니다.
 
-Normally, we don't write action objects directly in our code - we use action creator functions to make them, and use them like `dispatch(addTodo())`. In the same way, we typically write "thunk action creator" functions that return the thunk functions, like:
+일반적으로 우리는 코드에 액션 객체를 직접 작성하지 않습니다. 액션 생성 함수를 사용하여 만들고`dispatch (addTodo ())`처럼 사용합니다. 같은 방식으로, 우리는 일반적으로 다음과 같이 썽크 함수를 반환하는 "thunk action creator"함수를 작성합니다.
 
 ```js
 function exampleThunk() {
@@ -493,39 +493,38 @@ function exampleThunk() {
 store.dispatch(exampleThunk())
 ```
 
-#### Why Use Thunks?
+#### 왜 Thunks를 쓸까요?
 
-You might be wondering what the point of all this is. There's a few reasons to use thunks:
+이 모든 것의 요점이 무엇인지 궁금 할 것입니다. 썽크를 사용하는 데는 몇 가지 이유가 있습니다.
 
-- Thunks allow us to write reusable logic that interacts with _a_ Redux store, but without needing to reference a specific store instance.
-- Thunks enable us to move more complex logic outside of our components
-- From a component's point of view, it doesn't care whether it's dispatching a plain action or kicking off some async logic - it just calls `dispatch(doSomething())` and moves on.
-- Thunks can return values like promises, allowing logic inside the component to wait for something else to finish.
+- thunk를 사용하면 _a_ Redux 스토어와 상호 작용하는 재사용 가능한 로직을 작성할 수 있지만 특정 스토어 인스턴스를 참조 할 필요가 없습니다.
+- Thunk를 사용하면 구성 요소 외부로 더 복잡한 논리를 이동할 수 있습니다.
+- 컴포넌트의 관점에서 보면 평범한 액션을 전달하든 비동기 로직을 ​​시작하든 상관하지 않습니다. 단지`dispatch (doSomething())`을 호출하고 계속 진행합니다.
+- Thunk는 promise와 같은 값을 반환하여 구성 요소 내부의 논리가 다른 작업이 완료 될 때까지 기다릴 수 있습니다.
 
-For further explanations, see [these articles explaining thunks in the `redux-thunk` documentation](https://github.com/reduxjs/redux-thunk#why-do-i-need-this).
+자세한 설명은 [`redux-thunk`문서](https://github.com/reduxjs/redux-thunk#why-do-i-need-this)를 참조하세요.
 
-There are many other kinds of Redux middleware that add async capabilities. The most popular are [`redux-saga`](https://redux-saga.js.org/), which uses generator functions, and [`redux-observable`](https://redux-observable.js.org/), which uses RxJS observables. For some comparisons, see the [Redux FAQ entry on "how do I choose an async middleware?"](https://redux.js.org/faq/actions#what-async-middleware-should-i-use-how-do-you-decide-between-thunks-sagas-observables-or-something-else).
+비동기 기능을 추가하는 다른 종류의 Redux 미들웨어가 많이 있습니다. 가장 인기있는 것은 생성기 함수를 사용하는 [`redux-saga`](https://redux-saga.js.org/)와 [`redux-observable`](https://redux.js.org/faq/actions#what-async-middleware-should-i-use-how-do-you-decide-between-thunks-sagas-observables-or-something-else).
 
-However, while sagas and observables are useful, most apps do not need the power and capabilities they provide. So, **thunks are
-the default recommended approach for writing async logic with Redux**.
+그러나 sagas 및 Observable은 유용하지만 대부분의 앱에는 제공하는 성능과 기능이 필요하지 않습니다. 그래서 **thunks는 Redux**로 비동기 로직을 ​​작성하기위한 기본 권장 방식입니다.
 
-#### Writing Thunks in Redux Toolkit
+#### Redux Toolkit에서 Thunk 작성하기
 
-Writing thunk functions requires that the `redux-thunk` middleware be added to the store as part of the setup process. Redux Toolkit's `configureStore` function does automatically - [`thunk` is one of the default middleware](../api/getDefaultMiddleware.md).
+썽크 함수를 작성하려면 설정 프로세스의 일부로 'redux-thunk'미들웨어를 저장소에 추가해야합니다. Redux Toolkit의`configureStore` 기능은 자동으로 수행됩니다. [`thunk`는 기본 미들웨어 중 하나입니다] (../ api / getDefaultMiddleware.md).
 
-However, Redux Toolkit does not currently provide any special functions or syntax for writing thunk functions. In particular, they cannot be defined as part of a `createSlice()` call. You have to write them separate from the reducer logic.
+그러나 Redux Toolkit은 현재 썽크 함수 작성을위한 특수 함수 나 구문을 제공하지 않습니다. 특히`createSlice ()`호출의 일부로 정의 할 수 없습니다. 감속기 로직과 별도로 작성해야합니다.
 
-In a typical Redux app, thunk action creators are usually defined in an "actions" file, alongside the plain action creators. Thunks typically dispatch plain actions, such as `dispatch(dataLoaded(response.data))`.
+일반적인 Redux 앱에서 썽크 액션 생성자는 보통 일반 액션 생성자와 함께 "액션"파일에 정의됩니다. Thunks는 일반적으로`dispatch (dataLoaded (response.data))`와 같은 일반 작업을 전달합니다.
 
-Because we don't have separate "actions" files, it makes sense to write these thunks directly in our "slice" files. That way, they have access to the plain action creators from the slice, and it's easy to find where the thunk function lives.
+별도의 "작업"파일이 없기 때문에 이러한 썽크를 "슬라이스"파일에 직접 작성하는 것이 좋습니다. 이렇게하면 슬라이스에서 일반 액션 제작자에 액세스 할 수 있으며 썽크 함수가 어디에 있는지 쉽게 찾을 수 있습니다.
 
-### Logic for Fetching Github Repo Details
+### Github Repo 세부 정보를 가져 오는 논리
 
-#### Adding a Reusable Thunk Function Type
+#### 재사용 가능한 Thunk 함수 유형 추가
 
-Since the thunk middleware is already set up, we don't have to do any work there. However, the TypeScript types for thunks are kind of long and confusing, and we'd normally have to repeat the same type declaration for every thunk function we write.
+썽크 미들웨어가 이미 설정되어 있으므로 작업을 수행 할 필요가 없습니다. 그러나 썽크에 대한 TypeScript 유형은 다소 길고 혼란스럽고 일반적으로 우리가 작성하는 모든 썽크 함수에 대해 동일한 유형 선언을 반복해야합니다.
 
-Before we go any further, let's add a type declaration we can reuse instead.
+더 진행하기 전에 대신 재사용 할 수있는 유형 선언을 추가해 보겠습니다.
 
 > - [Add AppThunk type](https://github.com/reduxjs/rtk-github-issues-example/compare/Add_AppThunk_type~1..reduxjs:Add_AppThunk_type)
 
@@ -544,18 +543,18 @@ export type AppDispatch = typeof store.dispatch
 +export type AppThunk = ThunkAction<void, RootState, unknown, Action<string>>
 ```
 
-The `AppThunk` type declares that the "action" that we're using is specifically a thunk function. The thunk is customized with some additional type parameters:
+`AppThunk` 유형은 우리가 사용하는 "액션"이 특히 썽크 함수임을 선언합니다. 썽 크는 몇 가지 추가 유형 매개 변수로 사용자 정의됩니다.
 
-1. Return value: the thunk doesn't return anything
-2. State type for `getState`: returns our `RootState` type
-3. "Extra argument": the thunk middleware can be customized to pass in an extra value, but we aren't doing that in this app
-4. Action types accepted by `dispatch`: any action whose `type` is a string.
+1. 반환 값 : 썽크가 아무것도 반환하지 않습니다.
+2.`getState`의 상태 유형 :`RootState` 유형을 반환합니다.
+3. "추가 인수": 추가 값을 전달하도록 썽크 미들웨어를 사용자 정의 할 수 있지만이 앱에서는 그렇게하지 않습니다.
+4.`dispatch`에서 허용하는 작업 유형 :`type`이 문자열 인 모든 작업.
 
-There are many cases where you would want different type settings here, but these are probably the most common settings. This way, we can avoid repeating that same type declaration every time we write a thunk.
+여기에 다른 유형 설정을 원하는 경우가 많이 있지만 이것이 아마도 가장 일반적인 설정일 것입니다. 이렇게하면 썽크를 작성할 때마다 동일한 유형 선언이 반복되는 것을 방지 할 수 있습니다.
 
-#### Adding the Repo Details Slice
+#### Repo 세부 정보 조각 추가
 
-Now that we have that type, we can write a slice of state for fetching details on a repo.
+이제 해당 유형이 있으므로 리포지토리에 대한 세부 정보를 가져 오는 상태 조각을 작성할 수 있습니다.
 
 > - [Add a slice for storing repo details](https://github.com/reduxjs/rtk-github-issues-example/compare/Add_a_slice_for_storing_repo_details~1..reduxjs:Add_a_slice_for_storing_repo_details)
 
@@ -613,23 +612,23 @@ export const fetchIssuesCount = (
 }
 ```
 
-The first part of this should look straightforward. We declare our slice state shape, the initial state value, and write a slice with reducers that store the open issues count or an error string, then export the action creators and reducer.
+첫 번째 부분은 간단 해 보입니다. 슬라이스 상태 모양, 초기 상태 값을 선언하고 열린 문제 수 또는 오류 문자열을 저장하는 리듀서로 슬라이스를 작성한 다음 액션 생성자와 리듀서를 내 보냅니다.
 
-Down at the bottom, we have our first data fetching thunk. The important things to notice here are:
+하단에는 첫 번째 데이터 가져 오기 썽크가 있습니다. 여기서 주목해야 할 중요한 사항은 다음과 같습니다.
 
-- **The thunk is defined separately from the slice**, since RTK currently has no special syntax for defining thunks as part of a slice.
-- **We declare the thunk action creator as an arrow function, and use the `AppThunk` type we just created.** You can use either arrow functions or the `function` keyword to write thunk functions and thunk action creators, so we could also have written this as `function fetchIssueCount() : AppThunk` instead.
-- **We use the `async/await` syntax for the thunk function itself.** Again, this isn't required, but `async/await` usually results in simpler code than nested Promise `.then()` chains.
-- **Inside the thunk, we dispatch the plain action creators that were generated by the `createSlice` call**.
+- **Thunk는 슬라이스와 별도로 정의됩니다**. RTK에는 현재 슬라이스의 일부로 썽크를 정의하는 특수 구문이 없기 때문입니다.
+- **Thunk Action Creator를 화살표 함수로 선언하고 방금 만든 `AppThunk` 유형을 사용합니다.** 화살표 함수 또는`function`키워드를 사용하여 썽크 함수와 썽크 액션 생성자를 작성할 수 있습니다. 대신`function fetchIssueCount () : AppThunk`로 작성할 수도 있습니다.
+- **thunk 함수 자체에 `async / await` 구문을 사용합니다.** 다시 말하지만, 이것은 필수는 아니지만 일반적으로 `async / await`는 중첩 된 Promise`.then ()`체인보다 코드가 더 간단합니다.
+- **Thunk 내부에서 `createSlice` 호출로 생성 된 일반 액션 크리에이터를 export합니다**.
 
-While not shown, we also add the slice reducer to our root reducer.
+표시되지는 않았지만 루트 감속기에 슬라이스 감속기를 추가합니다.
 
-#### Async Error Handling Logic in Thunks
+#### Thunk에서 비동기 에러 핸들링
 
-There is one potential flaw with the `fetchIssuesCount()` thunk as written. The `try/catch` block will currently catch any errors thrown
-by `getRepoDetails()` (such as an actual failed AJAX call), but it will also catch any errors that occur inside the dispatch of `getRepoDetailsSuccess()`. In both cases, it will end up dispatch `getRepoDetailsFailed()`. This may not be the desired way to handle errors, as it might show a misleading reason for what the actual error was.
+작성된대로`fetchIssuesCount ()`썽크에 잠재적 인 결함이 하나 있습니다. `try / catch` 블록은 현재 발생한 오류를 포착합니다.
+(실제 실패한 AJAX 호출과 같은)`getRepoDetails ()`에 의해 이루어 지지만`getRepoDetailsSuccess ()`의 디스패치 내에서 발생하는 모든 오류도 포착합니다. 두 경우 모두`getRepoDetailsFailed ()`를 전달합니다. 이것은 실제 오류가 무엇인지에 대한 잘못된 이유를 보여줄 수 있으므로 오류를 처리하는 데 바람직한 방법이 아닐 수 있습니다.
 
-There are some possible ways to restructure the code to avoid this problem. First, the `await` could be switched to a standard promise chain, with separate callbacks passed in for the success and failure cases:
+이 문제를 방지하기 위해 코드를 재구성 할 수있는 몇 가지 방법이 있습니다. 첫째, `await`는 성공 및 실패 사례에 대해 별도의 콜백이 전달되는 표준 약속 체인으로 전환 될 수 있습니다.
 
 ```js
 getRepoDetails(org, repo).then(
@@ -640,7 +639,7 @@ getRepoDetails(org, repo).then(
 )
 ```
 
-Or, the thunk could be rewritten to only dispatch if no errors were caught:
+또는 오류가 발견되지 않은 경우에만 dispatch하도록 thunk를 다시 작성할 수 있습니다.
 
 ```ts
  let repoDetails
@@ -654,13 +653,13 @@ Or, the thunk could be rewritten to only dispatch if no errors were caught:
 }
 ```
 
-For sake of simplicity, we'll stick with the logic as-is for the rest of the tutorial.
+간단하게하기 위해 나머지 튜토리얼에서는 로직을 그대로 사용하겠습니다.
 
-### Fetching Repo Details in the Issues List
+### 문제 목록에서 Repo 세부 정보 가져 오기
 
-Now that the repo details slice exists, we can use it in the `<IssuesListPage>` component.
+이제 저장소 세부 정보 조각이 있으므로`<IssuesListPage>`구성 요소에서 사용할 수 있습니다.
 
-> - [Update IssuesListPage to fetch repo details via Redux](https://github.com/reduxjs/rtk-github-issues-example/compare/Update_IssuesListPage_to_fetch_repo_details_via_Redux~1..reduxjs:Update_IssuesListPage_to_fetch_repo_details_via_Redux)
+> - [Redux를 통해 리포지토리 세부 정보를 가져 오도록 IssuesListPage 업데이트](https://github.com/reduxjs/rtk-github-issues-example/compare/Update_IssuesListPage_to_fetch_repo_details_via_Redux~1..reduxjs:Update_IssuesListPage_to_fetch_repo_details_via_Redux)
 
 **features/issuesList/IssuesListPage.tsx**
 
@@ -731,15 +730,15 @@ export const IssuesListPage = ({
 + }, [org, repo, page, dispatch])
 ```
 
-In `<IssuesListPage>`, we import the new `fetchIssuesCount` thunk, and rewrite the component to read the open issues count value from the Redux store.
+`<IssuesListPage>`에서 새로운`fetchIssuesCount` 썽크를 가져오고 구성 요소를 다시 작성하여 Redux 저장소에서 열린 문제 수 값을 읽습니다.
 
-Inside our `useEffect`, we drop the `fetchIssueCount` function, and dispatch `fetchIssuesCount` instead.
+`useEffect` 내에서`fetchIssueCount`함수를 삭제하고 대신`fetchIssuesCount`를 전달합니다.
 
-### Logic for Fetching Issues for a Repo
+### 저장소에 대한 문제를 가져 오기위한 논리
 
-Next up, we need to replace the logic for fetching a list of open issues.
+다음으로 미해결 문제 목록을 가져 오는 로직을 교체해야합니다.
 
-> - [Add a slice for tracking issues state](https://github.com/reduxjs/rtk-github-issues-example/compare/Add_a_slice_for_tracking_issues_state~1..reduxjs:Add_a_slice_for_tracking_issues_state)
+> - [문제 상태 추적을위한 슬라이스 추가](https://github.com/reduxjs/rtk-github-issues-example/compare/Add_a_slice_for_tracking_issues_state~1..reduxjs:Add_a_slice_for_tracking_issues_state)
 
 **features/issuesList/issuesSlice.ts**
 
@@ -847,18 +846,18 @@ export const fetchIssue = (
 }
 ```
 
-This slice is a bit longer, but it's the same basic approach as before: write the slice with reducers that handle API call results, then write thunks that do the fetching and dispatch actions with those results. The only new and interesting bits in this slice are:
+이 슬라이스는 약간 더 길지만 이전과 동일한 기본 접근 방식입니다. API 호출 결과를 처리하는 리듀서로 슬라이스를 작성한 다음 해당 결과를 가져와 작업을 전달하는 썽크를 작성합니다. 이 조각에서 새롭고 흥미로운 부분은 다음과 같습니다.
 
-- Our "start fetching" and "fetch failed" reducer logic is the same for both the single issue and multiple issue fetch cases. So, we write those functions outside the slice once, then reuse them multiple times with different names inside the `reducers` object.
-- The Github API returns an array of issue entries, but we [want to store the data in a "normalized" structure to make it easy to look up an issue by its number](https://redux.js.org/recipes/structuring-reducers/normalizing-state-shape). In this case, we use a plain object as a lookup table, by declaring that it is a `Record<number, Issue>`.
+- '가져 오기 시작'및 '가져 오기 실패'리듀서 로직은 단일 문제 및 여러 문제 가져 오기 사례 모두에서 동일합니다. 따라서 우리는 슬라이스 외부에 이러한 함수를 한 번 작성한 다음`reducers` 객체 내부에서 다른 이름으로 여러 번 재사용합니다.
+- Github API는 이슈 항목의 배열을 반환하지만, 우리는 [번호로 이슈를 쉽게 찾을 수 있도록 데이터를 "정규화 된"구조로 저장하고 싶습니다](https://redux.js.org/recipes/structuring-reducers/normalizing-state-shape). 이 경우`Record <number, Issue>`를 선언하여 일반 객체를 조회 테이블로 사용합니다.
 
-### Fetching Issues in the Issues List
+### 이슈 목록에서 이슈 가져 오기
 
-Now we can finish converting the `<IssuesListPage>` component by swapping out the issues fetching logic.
+이제 로직을 가져 오는 이슈를 교체하여 `<IssuesListPage>`컴포넌트 변환을 완료 할 수 있습니다.
 
-> - [Update IssuesListPage to fetch issues data via Redux](https://github.com/reduxjs/rtk-github-issues-example/compare/Update_IssuesListPage_to_fetch_issues_data_via_Redux~1..reduxjs:Update_IssuesListPage_to_fetch_issues_data_via_Redux)
+> - [Redux를 통해 이슈 데이터를 가져 오도록 IssuesListPage 업데이트](https://github.com/reduxjs/rtk-github-issues-example/compare/Update_IssuesListPage_to_fetch_issues_data_via_Redux~1..reduxjs:Update_IssuesListPage_to_fetch_issues_data_via_Redux)
 
-Let's look at the changes.
+변화를 살펴보자.
 
 **features/issuesList/IssuesListPage.tsx**
 
@@ -935,19 +934,19 @@ import { IssuePagination, OnPageChangeCallback } from './IssuePagination'
   }, [org, repo, page, dispatch])
 ```
 
-We remove the remaining `useState` hooks from `<IssuesListPage>`, add another `useSelector` to retrieve the actual issues data from the Redux store, and construct the list of issues to render by mapping over the "current page issue IDs" array to look up each issue object by its ID.
+`<IssuesListPage>`에서 나머지 `useState` 후크를 제거하고 다른 ʻuseSelector`를 추가하여 Redux 저장소에서 실제 문제 데이터를 검색하고 "현재 페이지 문제 ID"배열에 매핑하여 렌더링 할 문제 목록을 구성합니다. ID로 각 이슈 객체를 조회합니다.
 
-In our `useEffect`, we delete the rest of the data fetching logic that's directly in the component, and just dispatch both data fetching thunks.
+`useEffect`에서 컴포넌트에 직접있는 나머지 데이터 가져 오기 로직을 ​​삭제하고 두 데이터 가져 오기 썽크를 모두 전달합니다.
 
-This simplifies the logic in the component, but it didn't remove the work being done - it just moved it elsewhere. Again, it's not that either approach is "right" or "wrong" - it's just a question of where you want the data and the logic to live, and which approach is more maintainable for your app and situation.
+이것은 구성 요소의 논리를 단순화하지만 수행중인 작업을 제거하지 않고 다른 곳으로 옮겼습니다. 다시 말하지만, 두 접근 방식이 "올바른"것인지 "틀렸는 지"가 아니라 데이터와 논리가 어디에 있는지, 어떤 접근 방식이 앱과 상황에 대해 더 유지 관리 할 수 ​​있는지에 대한 질문 일뿐입니다.
 
-## Converting the Issue Details Page
+## 이슈 세부 정보 페이지 변환
 
-The last major chunk of work left in the conversion is the `<IssueDetailsPage>` component. Let's take a look at what it does.
+변환에 남은 마지막 주요 작업은`<IssueDetailsPage>`구성 요소입니다. 그것이 무엇을하는지 살펴 보자.
 
-### Reviewing the Issue Details Component
+### 문제 세부 정보 구성 요소 검토
 
-Here's the current first half of `<IssueDetailsPage>`, containing the state and data fetching:
+다음은 상태 및 데이터 가져 오기를 포함하는`<IssueDetailsPage>`의 현재 전반입니다.
 
 ```ts
 export const IssueDetailsPage = ({
@@ -989,13 +988,12 @@ export const IssueDetailsPage = ({
 }
 ```
 
-It's very similar to `<IssuesListPage>`. We store the current displayed `Issue`, the fetched comments, and a potential error. We have `useEffect` hooks that fetch the current issue by its ID, and fetch the comments whenever the issue changes.
+`<IssuesListPage>`와 매우 유사합니다. 현재 표시된 ʻIssue`, 가져온 코멘트 및 잠재적 오류를 저장합니다. 현재 이슈를 ID로 가져오고 이슈가 변경 될 때마다 주석을 가져 오는 ʻuseEffect` 후크가 있습니다.
 
-### Fetching the Current Issue
+### 현재 문제 가져 오기
 
-We conveniently already have the Redux logic for fetching a single issue - we wrote that already as part of `issuesSlice.ts`. So, we can immediately jump straight to using that here in `<IssueDetailsPage>`.
-
-> - [Update IssueDetailsPage to fetch issue data via Redux](https://github.com/reduxjs/rtk-github-issues-example/compare/Update_IssueDetailsPage_to_fetch_issue_data_via_Redux~1..reduxjs:Update_IssueDetailsPage_to_fetch_issue_data_via_Redux)
+우리는 이미 단일 이슈를 가져 오기위한 Redux 로직을 가지고 있습니다. 이미 ʻissuesSlice.ts`의 일부로 작성했습니다. 따라서 바로 여기`<IssueDetailsPage>`에서 바로 사용할 수 있습니다.
+> - [Redux를 통해 이슈 데이터를 가져 오도록 IssueDetailsPage 업데이트](https://github.com/reduxjs/rtk-github-issues-example/compare/Update_IssueDetailsPage_to_fetch_issue_data_via_Redux~1..reduxjs:Update_IssueDetailsPage_to_fetch_issue_data_via_Redux)
 
 **features/issueDetails/IssueDetailsPage.tsx**
 
@@ -1050,17 +1048,17 @@ export const IssueDetailsPage = ({
 + }, [org, repo, issueId, issue, dispatch])
 ```
 
-We continue the usual pattern. We drop the existing `useState` hooks, pull in `useDispatch` and the necessary state via `useSelector`, and dispatch the `fetchIssue` thunk to fetch data.
+우리는 일반적인 패턴을 계속합니다. 기존의 ʻuseState` 후크를 삭제하고 ʻuseSelector`를 통해 ʻuseDispatch` 및 필요한 상태를 가져온 다음`fetchIssue` 썽크를 전달하여 데이터를 가져옵니다.
 
-Interestingly, there's actually a bit of a change in behavior here. The original React code was storing the fetched issues in `<IssuesListPage>`, and `<IssueDetailsPage>` was always having to do a separate fetch for its own issue. Because we're now storing issues in the Redux store, most of the time the listed issue _should_ be already cached, and we don't even need to fetch it. Now, it's totally possible to do something similar with just React - all we'd have to do is pass the issue down from the parent component. Still, having that data in Redux makes it easier to do the caching.
+흥미롭게도 여기에는 실제로 행동에 약간의 변화가 있습니다. 원래 React 코드는 가져온 이슈를`<IssuesListPage>`에 저장했고`<IssueDetailsPage>`는 항상 자체 이슈에 대해 별도의 가져 오기를 수행해야했습니다. 이제 Redux 스토어에 이슈를 저장하고 있기 때문에 대부분의 경우 나열된 이슈는 이미 캐시되어 있어야하며 가져올 필요도 없습니다. 이제 React만으로도 비슷한 일을 할 수 있습니다. 우리가해야 할 일은 부모 컴포넌트에서 이슈를 전달하는 것뿐입니다. 그래도 Redux에 해당 데이터가 있으면 캐싱을 더 쉽게 수행 할 수 있습니다.
 
-(As an interesting side note: the original code always caused the page to jump back to the top, because the issue didn't exist during the first render, so there was no content. If the issue _does_ exist and we render it right away, the page may retain the scroll position from the issues list, so we have to enforce scrolling back to the top.)
+(흥미로운 참고 사항 : 첫 번째 렌더링 중에 문제가 존재하지 않았기 때문에 콘텐츠가 없었기 때문에 원래 코드는 항상 페이지를 맨 위로 건너 뛰도록했습니다. 문제가 _does_ 존재하고 즉시 렌더링하면 , 페이지가 이슈 목록의 스크롤 위치를 유지할 수 있으므로 맨 위로 스크롤을 강제해야합니다.)
 
-### Logic for Fetching Comments
+### Comment 가져 오기 로직
 
-We have one more slice left to write - we need to fetch and store comments for the current issue.
+작성할 슬라이스가 하나 더 남아 있습니다. 현재 문제에 대한 주석을 가져 와서 저장해야합니다.
 
-> - [Add a slice for tracking comments data](https://github.com/reduxjs/rtk-github-issues-example/compare/Add_a_slice_for_tracking_comments_data~1..reduxjs:Add_a_slice_for_tracking_comments_data)
+> - [comments data추가를 위한 slice추가](https://github.com/reduxjs/rtk-github-issues-example/compare/Add_a_slice_for_tracking_comments_data~1..reduxjs:Add_a_slice_for_tracking_comments_data)
 
 **features/issueDetails/commentsSlice.ts**
 
@@ -1126,13 +1124,13 @@ export const fetchComments = (issue: Issue): AppThunk => async dispatch => {
 }
 ```
 
-The slice should look pretty familiar at this point. Our main bit of state is a lookup table of comments keyed by an issue ID. After the slice, we add a thunk to fetch the comments for a given issue, and dispatch the action to save the resulting array in the slice.
+이 시점에서 슬라이스는 꽤 익숙해 보일 것입니다. 우리의 주요 상태는 이슈 ID로 입력 된 주석의 조회 테이블입니다. 슬라이스 후, 주어진 이슈에 대한 주석을 가져 오는 썽크를 추가하고 결과 배열을 슬라이스에 저장하기위한 액션을 전달합니다.
 
-### Fetching the Issue Comments
+### 이슈 댓글 가져 오기
 
-The final step is to swap the comments fetching logic in `<IssueDetailsPage>`.
+마지막 단계는`<IssueDetailsPage>`에서 댓글 가져 오기 로직을 ​​바꾸는 것입니다.
 
-> - [Update IssueDetailsPage to fetch comments via Redux](https://github.com/reduxjs/rtk-github-issues-example/compare/Update_IssueDetailsPage_to_fetch_comments_via_Redux~1..reduxjs:Update_IssueDetailsPage_to_fetch_comments_via_Redux)
+> - [Redux를 통해 댓글을 가져 오도록 IssueDetailsPage 업데이트](https://github.com/reduxjs/rtk-github-issues-example/compare/Update_IssueDetailsPage_to_fetch_comments_via_Redux~1..reduxjs:Update_IssueDetailsPage_to_fetch_comments_via_Redux)
 
 **features/issueDetails/IssueDetailsPage.tsx**
 
@@ -1196,27 +1194,27 @@ export const IssueDetailsPage = ({
 + }, [issue, dispatch])
 ```
 
-We add another `useSelector` hook to pull out the current comments data. In this case, we need three different pieces: the loading flag, a potential error, and the actual comments array for this issue.
+현재 코멘트 데이터를 가져 오기 위해 또 다른 ʻuseSelector` 후크를 추가합니다. 이 경우 로딩 플래그, 잠재적 오류 및이 문제에 대한 실제 코멘트 배열의 세 가지 다른 부분이 필요합니다.
 
-However, this leads to a performance problem. Every time this selector runs, it returns a new object: `{commentsLoading, commentsError, comments}`. **Unlike `connect`, `useSelector` relies on reference equality by default.** So, returning a new object will cause this component to rerender every time an action is dispatched, even if the comments are the same!
+그러나 이로 인해 성능 문제가 발생합니다. 이 선택기가 실행될 때마다`{commentsLoading, commentsError, comments}`라는 새 객체를 반환합니다. **`connect`와 달리 ʻuseSelector`는 기본적으로 참조 동등성에 의존합니다.** 따라서 새 객체를 반환하면 코멘트이 동일하더라도 작업이 전달 될 때마다이 구성 요소가 다시 렌더링됩니다!
 
-There's a few ways to fix this:
+이 문제를 해결하는 몇 가지 방법이 있습니다.
 
-- We could write those as separate `useSelector` calls
-- We could use a memoized selector, such as `createSelector` from Reselect
-- We can use the React-Redux `shallowEqual` function to compare the results, so that the re-render only happens if the object's _contents_ have changed.
+- 별도의 'useSelector'호출로 작성할 수 있습니다.
+- Reselect의`createSelector`와 같은 메모 된 선택기를 사용할 수 있습니다.
+- React-Redux`shallowEqual` 함수를 사용하여 결과를 비교할 수 있으므로 객체의 _contents_가 변경된 경우에만 다시 렌더링이 발생합니다.
 
-In this case, we'll add `shallowEqual` as the comparison function for `useSelector`.
+이 경우 `useSelector`의 비교 함수로`shallowEqual`을 추가합니다.
 
-## Summary
+## 요약
 
-And with that, we're done! The entire Github Issues app should now be fetching its data via thunks, storing the data in Redux, and interacting with the store via React-Redux hooks. We have Typescript types for our Github API calls, the API types are being used for the Redux state slices, and the store state types are being used in our React components.
+그리고 그것으로 우리는 끝났습니다! 전체 Github Issues 앱은 이제 썽크를 통해 데이터를 가져오고, Redux에 데이터를 저장하고, React-Redux 후크를 통해 스토어와 상호 작용해야합니다. Github API 호출을위한 Typescript 유형이 있고 API 유형은 Redux 상태 슬라이스에 사용되고 저장소 상태 유형은 React 구성 요소에서 사용됩니다.
 
-There's more that could be done to add more type safety if we wanted (like trying to constrain which possible action types can be passed to `dispatch`), but this gives us a reasonable "80% solution" without too much extra effort.
+우리가 원하면 더 많은 타입 안전성을 추가하기 위해 할 수있는 일이 더 많지만 (예를 들어`dispatch`에 전달할 수있는 가능한 액션 유형을 제한하려는 시도), 이는 너무 많은 추가 노력없이 합리적인 "80 % 솔루션"을 제공합니다.
 
-Hopefully you now have a solid understanding of how Redux Toolkit looks in a real world application.
+이제 Redux Toolkit이 실제 응용 프로그램에서 어떻게 보이는지 확실히 이해 하셨기를 바랍니다.
 
-Let's wrap this up with one more look at the complete source code and the running app:
+전체 소스 코드와 실행중인 앱을 한 번 더 살펴보면서 마무리하겠습니다.
 
 <iframe src="https://codesandbox.io/embed/rtk-github-issues-example-03-final-ihttc?fontsize=14&hidenavigation=1&module=%2Fsrc%2Ffeatures%2FissueDetails%2FcommentsSlice.ts&theme=dark&view=editor"
      style={{ width: '100%', height: '500px', border: 0, borderRadius: '4px', overflow: 'hidden' }}
