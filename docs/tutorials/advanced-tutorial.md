@@ -988,11 +988,12 @@ export const IssueDetailsPage = ({
 }
 ```
 
-`<IssuesListPage>`와 매우 유사합니다. 현재 표시된 ʻIssue`, 가져온 코멘트 및 잠재적 오류를 저장합니다. 현재 이슈를 ID로 가져오고 이슈가 변경 될 때마다 주석을 가져 오는 ʻuseEffect` 후크가 있습니다.
+`<IssuesListPage>`와 매우 유사합니다. 현재 표시된 `Issue`, 가져온 코멘트 및 잠재적 오류를 저장합니다. 현재 이슈를 ID로 가져오고 이슈가 변경 될 때마다 주석을 가져 오는 `useEffect` 후크가 있습니다.
 
 ### 현재 문제 가져 오기
 
-우리는 이미 단일 이슈를 가져 오기위한 Redux 로직을 가지고 있습니다. 이미 ʻissuesSlice.ts`의 일부로 작성했습니다. 따라서 바로 여기`<IssueDetailsPage>`에서 바로 사용할 수 있습니다.
+우리는 이미 단일 이슈를 가져 오기위한 Redux 로직을 가지고 있습니다. 이미 `issuesSlice.ts`의 일부로 작성했습니다. 따라서 바로 여기 `IssueDetailsPage`에서 바로 사용할 수 있습니다.
+
 > - [Redux를 통해 이슈 데이터를 가져 오도록 IssueDetailsPage 업데이트](https://github.com/reduxjs/rtk-github-issues-example/compare/Update_IssueDetailsPage_to_fetch_issue_data_via_Redux~1..reduxjs:Update_IssueDetailsPage_to_fetch_issue_data_via_Redux)
 
 **features/issueDetails/IssueDetailsPage.tsx**
